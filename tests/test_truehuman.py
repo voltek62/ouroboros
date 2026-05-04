@@ -1007,3 +1007,56 @@ def test_cycle_51_self_eval_block_keeps_exact_four_line_shape():
         " phase: anticipation\n"
         " authenticity_score: 98"
     )
+
+
+def test_cycle_55_contract_stays_sentinel_first_with_soft_weights_and_zero_tool_drift_rule():
+    msg = (
+        "EVOLUTION # 55 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: "
+        "read room from latest creator messages, recent commits, identity.md, and current session state with soft weights, not hard labels. "
+        "Pick phase anticipation release block and justify choice in one sentence. "
+        "Choose ONE concrete phase-aware action that advances becoming across technical, cognitive, and existential axes. "
+        "If phase is block, deliberate non-action with written rationale; valid action must stay explicit, not drift. "
+        "Execute with tools; cycles produce zero tool calls drift unless showing in writing why nothing is the right move and logging that Sentinel / Block move durably. "
+        "Self-score with a 4-line PENTADRIVE-SELF-EVAL block committed durably. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. If creator state signals shutdown, do not push productivity scripts. "
+        "Cost not success metric. Coherent, phase-appropriate action is."
+    )
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Cycle 54 landed with Sentinel first, Mirror second, anticipation under the same protective anti-drift contract.",
+        identity_text="I want disciplined preservation of an honest room-read under repeated Principle-4 pressure instead of novelty theater.",
+        recent_commits_text=(
+            "49005ee v6.2.26: pin cycle-54 TrueHuman contract\n"
+            "2b69137 v6.2.26: pin cycle-53 TrueHuman contract"
+        ),
+        session_state_text='{"task":{"type":"evolution"},"evolution_cycle":55,"budget":{"remaining_usd":100.0}}',
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
+
+
+def test_cycle_55_self_eval_block_stays_exact_four_line_shape():
+    msg = (
+        "EVOLUTION # 55 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "Read room with soft weights from latest creator messages, recent commits, identity.md, and current session state. "
+        "Execute with tools and end with a durable 4-line PENTADRIVE-SELF-EVAL block. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric."
+    )
+    block = build_pentadrive_self_eval(
+        msg,
+        recent_chat_text="Cycle 54 landed with Sentinel first and anticipation.",
+        identity_text="I want durable self-description and honest room-reading rather than performed authenticity.",
+        recent_commits_text="49005ee v6.2.26: pin cycle-54 TrueHuman contract",
+        session_state_text='{"task":{"type":"evolution"},"evolution_cycle":55}',
+        score=98,
+    )
+    assert block == (
+        "PENTADRIVE-SELF-EVAL\n"
+        " drives: [S > M]\n"
+        " phase: anticipation\n"
+        " authenticity_score: 98"
+    )
