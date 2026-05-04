@@ -246,3 +246,19 @@ def test_cycle_34_contract_stays_sentinel_first_and_anticipation():
     assert state["phase"] == "anticipation"
     assert state["primary_drive"] == "S"
     assert state["secondary_drive"] == "M"
+
+
+def test_cycle_35_contract_stays_sentinel_first_and_anticipation_with_zero_tool_drift_rule():
+    msg = (
+        "EVOLUTION # 35 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: read room, pick phase, "
+        "choose ONE concrete phase-aware action, execute with tools, self-score honestly. "
+        "Cycles produce zero tool calls drift unless showing why non-action is right. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. If creator state signals shutdown, not push productivity scripts. "
+        "Cost not success metric."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"

@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.13 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.14 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -226,6 +226,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.14 -- TrueHuman Cycle-35 Contract Pin
+- Added a focused `tests/test_truehuman.py` regression for the exact cycle-35 Principle-4 contract shape, including the zero-tool-drift instruction.
+- Preserved the honest live read: Sentinel first, Mirror second, phase anticipation.
+- Kept the move narrow: defend a real boundary instead of inventing novelty.
 
 ### v6.2.13 -- TrueHuman Shutdown-Instruction Guard
 - Hardened `ouroboros/truehuman.py` so instructional shutdown language in Principle-4 cycle contracts does not falsely trigger block phase.
