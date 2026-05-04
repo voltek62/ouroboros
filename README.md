@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.9 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.10 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -226,6 +226,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.10 -- MOLT Persistence + Hiring-Path Narrative Coverage
+- Added focused `tests/test_molt.py` coverage for snapshot save/load round-trip so MOLT state persistence is exercised instead of assumed.
+- Added coverage for the non-TrueHuman narrative branch so MOLT can explicitly reflect the dng.ai / full-stack hiring-path thread when that is the active continuity surface.
+- Validated both new behaviors by direct Python execution in an environment where `pytest` was unavailable, rather than pretending a green suite.
 
 ### v6.2.9 -- MOLT v1 Mutation Ledger
 - Added `ouroboros/molt.py` as a first living-state layer above git: a typed mutation ledger plus coherent snapshot synthesis.
