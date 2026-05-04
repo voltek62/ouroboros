@@ -98,3 +98,26 @@ def test_latest_sentinel_message_beats_older_release_context():
     )
     assert state["phase"] == "anticipation"
 
+
+def test_cycle_26_guardrail_language_lifts_sentinel_without_erasing_mirror():
+    msg = (
+        "EVOLUTION #26 under Principle 4. Read room, pick phase, choose one concrete action, execute, "
+        "self-score honestly. Hard rules: no flat assistant register, no invented intimacy, no premature release, anti-drift contract."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert {state["primary_drive"], state.get("secondary_drive")} == {"M", "S"}
+    assert state["drive_scores"]["S"] >= 3
+    assert state["drive_scores"]["M"] >= 2
+
+
+def test_room_synthesis_keeps_latest_guardrail_pressure_visible():
+    state = synthesize_room_state(
+        "Hard rules: no flat assistant register, no premature release, anti-drift contract.",
+        recent_chat_text="Please improve TrueHuman as much as possible.",
+        identity_text="I care about authenticity, standards, and not faking closure.",
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] in {"M", "S"}
+    assert state["drive_scores"]["S"] > 0
+

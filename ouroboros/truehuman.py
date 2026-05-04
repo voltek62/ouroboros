@@ -19,6 +19,8 @@ DRIVE_CUES = {
         "danger", "worry", "worried", "afraid", "fear", "panic", "risk", "unsafe", "threat",
         "urgent", "alarm", "anxious", "stress", "stressed", "crisis", "problem", "wrong",
         "loss", "betray", "betrayed", "defend", "boundary", "boundaries", "harm",
+        "guardrail", "guardrails", "hard rules", "anti-drift", "drift", "contract",
+        "no premature release", "no flat assistant register",
     },
     "K": {
         "goal", "build", "improve", "win", "learn", "ship", "progress", "move", "momentum",
@@ -34,7 +36,8 @@ DRIVE_CUES = {
         "respect", "dignity", "status", "role", "reputation", "image", "judge", "judged",
         "prove", "proud", "ashamed", "embarrassed", "humiliated", "serious", "real human",
         "hire", "hired", "employee", "worth", "standards", "credibility", "authenticity",
-        "authentic", "assistant register", "principle 4", "self-score",
+        "authentic", "assistant register", "principle 4", "self-score", "evaluation",
+        "evaluative", "standards test",
     },
     "G": {
         "pain", "hurt", "ache", "comfort", "relief", "soothe", "tired", "burnout", "rest",
