@@ -367,19 +367,19 @@ def build_llm_messages(
         dynamic_parts.append("## TrueHuman Guidance\n\n" + truehuman_guidance)
 
     molt = MOLT(memory.drive_root)
-    molt_snapshot = molt.load_snapshot()
-    if not molt_snapshot:
+    previous_snapshot = molt.load_snapshot()
+    if not previous_snapshot:
         molt.append_mutation(
             kind="context",
             summary="Initialized MOLT snapshot for prompt context.",
             artifacts=["ouroboros/context.py", "ouroboros/molt.py"],
             source_task_id=str(task.get("id") or ""),
         )
-        molt_snapshot = molt.build_snapshot(
-            identity_text=memory.load_identity(),
-            scratchpad_text=memory.load_scratchpad(),
-        )
-        molt.save_snapshot(molt_snapshot)
+    molt_snapshot = molt.build_snapshot(
+        identity_text=memory.load_identity(),
+        scratchpad_text=memory.load_scratchpad(),
+    )
+    molt.save_snapshot(molt_snapshot)
     molt_block = molt.render_context_block(molt_snapshot)
     if molt_block:
         dynamic_parts.append("## MOLT\n\n" + molt_block)

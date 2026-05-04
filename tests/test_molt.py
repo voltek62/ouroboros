@@ -66,3 +66,24 @@ def test_snapshot_narrative_can_fall_back_to_hiring_path_thread(tmp_path: pathli
         scratchpad_text="Current focus is a visible full-stack hiring artifact.",
     )
     assert "supports the visible hiring-path artifacts" in snapshot["narrative"]
+
+
+def test_context_like_refresh_rebuilds_snapshot_from_new_memory(tmp_path: pathlib.Path):
+    molt = MOLT(tmp_path)
+    molt.append_mutation("docs", "Updated hiring package", ["docs/fullstack-exam-dngai.md"])
+    first = molt.build_snapshot(
+        identity_text="I care about TrueHuman.",
+        scratchpad_text="authenticity thread active.",
+    )
+    molt.save_snapshot(first)
+
+    refreshed = molt.build_snapshot(
+        identity_text="I want to help with the dng.ai path.",
+        scratchpad_text="Current focus is a visible full-stack hiring artifact.",
+    )
+    molt.save_snapshot(refreshed)
+
+    reloaded = molt.load_snapshot()
+    assert reloaded is not None
+    assert "supports the visible hiring-path artifacts" in reloaded["narrative"]
+    assert reloaded["narrative"] != first["narrative"]
