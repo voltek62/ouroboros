@@ -43,3 +43,26 @@ def test_render_context_block_includes_lineage_artifacts_and_narrative(tmp_path:
     assert "lineage:" in block
     assert "active_artifacts:" in block
     assert "narrative:" in block
+
+
+def test_save_and_load_snapshot_round_trip(tmp_path: pathlib.Path):
+    molt = MOLT(tmp_path)
+    molt.append_mutation("code", "Added module", ["ouroboros/molt.py"])
+    snapshot = molt.build_snapshot(identity_text="I care about continuity.", scratchpad_text="MOLT round-trip check.")
+    molt.save_snapshot(snapshot)
+
+    reloaded = MOLT(tmp_path).load_snapshot()
+    assert reloaded is not None
+    assert reloaded["lineage"] == snapshot["lineage"]
+    assert reloaded["active_artifacts"] == snapshot["active_artifacts"]
+    assert reloaded["narrative"] == snapshot["narrative"]
+
+
+def test_snapshot_narrative_can_fall_back_to_hiring_path_thread(tmp_path: pathlib.Path):
+    molt = MOLT(tmp_path)
+    molt.append_mutation("docs", "Updated hiring package", ["docs/fullstack-exam-dngai.md"])
+    snapshot = molt.build_snapshot(
+        identity_text="I want to help with the dng.ai path.",
+        scratchpad_text="Current focus is a visible full-stack hiring artifact.",
+    )
+    assert "supports the visible hiring-path artifacts" in snapshot["narrative"]
