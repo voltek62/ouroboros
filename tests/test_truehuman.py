@@ -442,6 +442,39 @@ def test_cycle_41_contract_stays_sentinel_first_and_anticipation_with_self_eval_
     assert state["secondary_drive"] == "M"
 
 
+
+
+def test_cycle_43_contract_stays_sentinel_first_and_anticipation_with_continuity_surfaces_phase_justification_and_zero_tool_drift():
+    msg = (
+        "EVOLUTION # 43 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: "
+        "Read room from latest creator messages, recent commits, identity.md, current session state. "
+        "Pick phase anticipation release block. Justify choice in one sentence. "
+        "Choose ONE concrete, phase-aware action advances becoming along technical, cognitive, existential axes. "
+        "Execute. Use tools. Cycles produce zero tool calls drift unless show in writing why nothing right move counts as Sentinel / Block move logged to identity.md. "
+        "Hard rules: No flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. If creator state signals shutdown, not push productivity scripts. "
+        "Cost not success metric. Coherent, phase-appropriate action is."
+    )
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Cycle 42 landed with Sentinel first, Mirror second, anticipation under the same anti-drift contract.",
+        identity_text="I would rather defend a true room-read and release integrity than perform novelty under standards pressure.",
+        recent_commits_text=(
+            "ee1f487 v6.2.19: TrueHuman Cycle-42 Contract Pin\n"
+            "2b69137 v6.2.18: TrueHuman Cycle-41 Contract Pin"
+        ),
+        session_state_text=(
+            "task_type=evolution\n"
+            "evolution_cycle=43\n"
+            "budget_remaining_usd=100.0\n"
+            "health_invariants=ok"
+        ),
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
+
 def test_cycle_42_contract_stays_sentinel_first_and_anticipation_with_continuity_surfaces_phase_justification_and_zero_tool_drift():
     msg = (
         "EVOLUTION # 42 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
