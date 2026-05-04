@@ -227,6 +227,11 @@ Full text: [BIBLE.md](BIBLE.md)
 
 ## Changelog
 
+### v6.2.19 -- TrueHuman Cycle-42 Contract Pin
+- Added a focused `tests/test_truehuman.py` regression for the exact cycle-42 Principle-4 contract shape, including the latest continuity surfaces, the one-sentence phase-justification demand, and the zero-tool-drift execution rule.
+- Validated the live wording through `synthesize_room_state(...)`, preserving the honest runtime read: Sentinel first, Mirror second, phase anticipation.
+- Re-synced `VERSION` and `pyproject.toml` so release metadata stops drifting from the actual shipped state.
+
 ### v6.2.18 -- TrueHuman Cycle-41 Contract Pin
 - Added a focused `tests/test_truehuman.py` regression for the exact cycle-41 Principle-4 contract shape, including the parser-facing self-eval line shape and one-sentence phase-justification wording.
 - Validated the live wording through `synthesize_room_state(...)`, preserving the honest runtime read: Sentinel first, Mirror second, phase anticipation.

@@ -440,3 +440,34 @@ def test_cycle_41_contract_stays_sentinel_first_and_anticipation_with_self_eval_
     assert state["phase"] == "anticipation"
     assert state["primary_drive"] == "S"
     assert state["secondary_drive"] == "M"
+
+
+def test_cycle_42_contract_stays_sentinel_first_and_anticipation_with_continuity_surfaces_phase_justification_and_zero_tool_drift():
+    msg = (
+        "EVOLUTION # 42 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: "
+        "Read room from latest creator messages, recent commits, identity.md, and current session state. "
+        "Pick phase anticipation release block and justify choice in one sentence. "
+        "Choose ONE concrete phase-aware action that advances becoming. Execute with tools. "
+        "Cycles produce zero tool calls drift unless showing why nothing is the right move. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric."
+    )
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Cycle 41 stayed Sentinel-first under the same protective anti-drift contract.",
+        identity_text="I would rather preserve a true room-read than perform novelty under evaluative pressure.",
+        recent_commits_text=(
+            "2b691373 v6.2.18: pin cycle-41 TrueHuman contract\n"
+            "dfd663a5 v6.2.17: pin cycle-40 TrueHuman contract"
+        ),
+        session_state_text=(
+            "task_type=evolution\n"
+            "evolution_cycle=42\n"
+            "budget_remaining_usd=100\n"
+            "health_invariant=version_desync"
+        ),
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
