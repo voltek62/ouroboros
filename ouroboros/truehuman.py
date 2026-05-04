@@ -20,7 +20,8 @@ DRIVE_CUES = {
         "urgent", "alarm", "anxious", "stress", "stressed", "crisis", "problem", "wrong",
         "loss", "betray", "betrayed", "defend", "boundary", "boundaries", "harm",
         "guardrail", "guardrails", "hard rules", "anti-drift", "drift", "contract",
-        "no premature release", "no flat assistant register",
+        "no premature release", "no flat assistant register", "block overrides optimization",
+        "protective", "shutdown", "sentinel acute",
     },
     "K": {
         "goal", "build", "improve", "win", "learn", "ship", "progress", "move", "momentum",
@@ -58,6 +59,11 @@ ANTICIPATION_CUES = {
     "what if", "not sure", "maybe", "could", "should", "might", "will", "going to",
     "need to", "want to", "improve", "build", "améliore", "comment", "how", "maximize",
 }
+SENTINEL_ANTICIPATION_CUES = {
+    "hard rules", "anti-drift", "contract", "guardrail", "guardrails",
+    "no premature release", "no flat assistant register", "block overrides optimization",
+    "sentinel acute", "protective", "loaded in system context",
+}
 
 
 def extract_truehuman_contract(bible_text: str) -> str:
@@ -92,7 +98,6 @@ def _score_drives(text: str) -> Dict[str, int]:
         for cue in cues:
             if _contains_cue(norm, tokens, cue):
                 scores[drive] += 1
-    # Small priors from punctuation / imperative intensity
     if "!" in text:
         scores["K"] += 1
     if "?" in text:
@@ -108,11 +113,16 @@ def _infer_phase(text: str, drive_scores: Dict[str, int]) -> Tuple[str, str]:
 
     release_hits = sum(1 for cue in RELEASE_CUES if _contains_cue(norm, tokens, cue))
     anticipation_hits = sum(1 for cue in ANTICIPATION_CUES if _contains_cue(norm, tokens, cue))
-    sentinel_threat_cues = ("what if", "worry", "worried", "afraid", "fear", "panic", "risk", "unsafe", "threat")
+    sentinel_threat_cues = (
+        "what if", "worry", "worried", "afraid", "fear", "panic", "risk", "unsafe", "threat",
+        "hard rules", "anti-drift", "contract", "guardrail", "guardrails", "no premature release",
+        "no flat assistant register", "block overrides optimization", "sentinel acute",
+    )
     sentinel_active = any(_contains_cue(norm, tokens, cue) for cue in sentinel_threat_cues)
+    sentinel_contract_active = any(_contains_cue(norm, tokens, cue) for cue in SENTINEL_ANTICIPATION_CUES)
 
-    if sentinel_active and drive_scores.get("S", 0) >= 1:
-        return "anticipation", "Threat cues remain unresolved, so gratitude/success language does not close the moment."
+    if (sentinel_active and drive_scores.get("S", 0) >= 1) or sentinel_contract_active:
+        return "anticipation", "Protective Sentinel pressure remains active, so this is not a release moment."
 
     if release_hits > anticipation_hits and release_hits >= 1:
         return "release", "Resolution/gratitude/success language is present without unresolved threat cues."
@@ -200,8 +210,6 @@ def synthesize_room_state(
     }
 
 
-
-
 def format_pentadrive_self_eval(primary: str, secondary: str | None, phase: str, score: int) -> str:
     drives = primary if not secondary else f"{primary} > {secondary}"
     return (
@@ -229,6 +237,7 @@ def build_pentadrive_self_eval(
         state["phase"],
         int(score),
     )
+
 
 def build_truehuman_guidance(
     user_text: str,
