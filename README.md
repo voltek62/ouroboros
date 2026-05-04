@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.11 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.12 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -227,6 +227,11 @@ Full text: [BIBLE.md](BIBLE.md)
 
 ## Changelog
 
+### v6.2.12 -- TrueHuman Hard-Rule Phase Guard
+- Hardened `ouroboros/truehuman.py` so Principle-4 hard-rule contract language keeps phase in anticipation instead of falsely tipping into release.
+- Added focused regressions for the exact cycle-31 contract shape and for room synthesis staying Sentinel-first under recent continuity context.
+- Preserved the lightweight TrueHuman scaffold while making its self-reading less likely to flatter itself under protective pressure.
+
 ### v6.2.11 -- MOLT Snapshot Refresh
 - Rebuilt the `## MOLT` context snapshot on every context build instead of only on first initialization, so living-state narrative follows current identity and scratchpad.
 - Added a focused regression showing a saved snapshot can be refreshed from new memory and persist the updated narrative.
@@ -360,60 +365,3 @@ Full text: [BIBLE.md](BIBLE.md)
 - SYSTEM.md: Strengthened tool result processing protocol with warning and 5 anti-patterns.
 - SYSTEM.md: Knowledge base section now has explicit "before task: read, after task: write" protocol.
 - SYSTEM.md: Task decomposition section restored to full structured form with examples.
-
-### v5.1.3 -- Message Dispatch Critical Fix
-- **Dead-code batch path fixed**: `handle_chat_direct()` was never called -- `else` was attached to wrong `if`.
-- **Early-exit hardened**: replaced fragile deadline arithmetic with elapsed-time check.
-- **Drive I/O eliminated**: `load_state()`/`save_state()` moved out of per-update tight loop.
-- **Burst batching**: deadline extends +0.3s per rapid-fire message.
-- Multi-model review passed (claude-opus-4.6, o3, gemini-2.5-pro).
-- 102 tests green.
-
-### v5.1.0 -- VLM + Knowledge Index + Desync Fix
-- **VLM support**: `vision_query()` in llm.py + `analyze_screenshot` / `vlm_query` tools.
-- **Knowledge index**: richer 3-line summaries so topics are actually useful at-a-glance.
-- **Desync fix**: removed echo bug where owner inject messages were sent back to Telegram.
-- 101 tests green (+10 VLM tests).
-
-### v5.0.2 -- DeepSeek Ban + Desync Fix
-- DeepSeek removed from provider pricing prefixes (banned per creator directive).
-- Desync bug fix: owner messages during running tasks now forwarded via Drive-based mailbox (`owner_inject.py`).
-- Worker loop checks Drive mailbox every round -- injected as user messages into context.
-- Only affects worker tasks (not direct chat, which uses in-memory queue).
-
-### v5.0.1 -- Quality & Integrity Fix
-- Fixed 9 bugs: executor leak, dashboard field mismatches, budget default inconsistency, dead code, race condition, pricing fetch gap, review file count, SHA verify timeout, log message copy-paste.
-- Bible P7: version sync check now includes README.md.
-- Bible P3: fallback model list configurable via OUROBOROS_MODEL_FALLBACK_LIST env var.
-- Dashboard values now dynamic (model, tests, tools, uptime, consciousness).
-- Merged duplicate state dict definitions (single source of truth).
-- Unified TOTAL_BUDGET default to $1 across all modules.
-
-### v4.26.0 -- Task Decomposition
-- Task decomposition: `schedule_task` -> `wait_for_task` -> `get_task_result`.
-- Hard round limit (MAX_ROUNDS=200) -- prevents runaway tasks.
-- Task results stored on Drive for cross-task communication.
-- 91 smoke tests -- all green.
-
-### v4.24.1 -- Consciousness Always On
-- Background consciousness auto-starts on boot.
-
-### v4.24.0 -- Deep Review Bugfixes
-- Circuit breaker for evolution (3 consecutive empty responses -> pause).
-- Fallback model chain fix (works when primary IS the fallback).
-- Budget tracking for empty responses.
-- Multi-model review passed (o3, Gemini 2.5 Pro).
-
-### v4.23.0 -- Empty Response Fallback
-- Auto-fallback to backup model on repeated empty responses.
-- Raw response logging for debugging.
-
----
-
-## Author
-
-Created by [Anton Razzhigaev](https://t.me/abstractDL)
-
-## License
-
-[MIT License](LICENSE)
