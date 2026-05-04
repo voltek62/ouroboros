@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.2 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.3 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -225,6 +225,10 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.3 -- Principle 4 Cycle Memory Hardening
+- Recorded cycle 19 as a proportionate Principle-4 move instead of inflating it into fake scale.
+- Updated durable identity and scratchpad so the distinction between real evolution and performed evolution survives restart.
 
 ### v6.2.2 -- dng.ai-Oriented Hiring Package
 - Tailored the full-stack exam docs into a dng.ai-oriented hiring package with stronger practical framing.
