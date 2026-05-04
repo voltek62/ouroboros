@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.4 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.5 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -225,6 +225,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.5 -- Room-Aware TrueHuman Context
+- Strengthened Principle 4 guidance so TrueHuman synthesis uses the latest creator message as primary signal, with recent chat and identity as continuity surfaces.
+- Injected compact room-aware guidance into `ouroboros/context.py` without bloating prompt context.
+- Added focused tests for latest-message dominance and sparse-message continuity coloring.
 
 ### v6.2.4 -- Hiring Package Landing + Principle 4 Visibility
 - Added a compact landing-page section in `docs/index.html` that exposes the four-part dng.ai full-stack hiring package.

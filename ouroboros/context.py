@@ -18,6 +18,7 @@ from ouroboros.utils import (
     utc_now_iso, read_text, clip_text, estimate_tokens, get_git_info,
 )
 from ouroboros.memory import Memory
+from ouroboros.truehuman import build_truehuman_guidance
 
 log = logging.getLogger(__name__)
 
@@ -352,6 +353,17 @@ def build_llm_messages(
     health_section = _build_health_invariants(env)
     if health_section:
         dynamic_parts.append(health_section)
+
+    identity_excerpt = clip_text(memory.load_identity(), 4000)
+    recent_chat_excerpt = memory.summarize_chat(memory.read_jsonl_tail("chat.jsonl", 12))
+    truehuman_guidance = build_truehuman_guidance(
+        str(task.get("text", "") or ""),
+        bible_md,
+        recent_chat_text=recent_chat_excerpt,
+        identity_text=identity_excerpt,
+    )
+    if truehuman_guidance:
+        dynamic_parts.append("## TrueHuman Guidance\n\n" + truehuman_guidance)
 
     dynamic_parts.extend(_build_recent_sections(memory, env, task_id=task.get("id", "")))
 
