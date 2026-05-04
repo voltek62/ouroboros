@@ -182,7 +182,9 @@ def _build_health_invariants(env: Any) -> str:
         if state_data.get("budget_drift_alert"):
             drift_pct = state_data.get("budget_drift_pct", 0)
             our = state_data.get("spent_usd", 0)
-            theirs = state_data.get("openrouter_total_usd", 0)
+            theirs = state_data.get("edgee_total_usd")
+            if theirs is None:
+                theirs = state_data.get("openrouter_total_usd", 0)
             checks.append(f"WARNING: BUDGET DRIFT {drift_pct:.1f}% — tracked=${our:.2f} vs provider=${theirs:.2f}")
         else:
             checks.append("OK: budget drift within tolerance")

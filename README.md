@@ -57,7 +57,7 @@ Telegram --> colab_launcher.py
                 control.py          -- restart, evolve, review
                 browser.py          -- Playwright (stealth)
                 review.py           -- multi-model review
-              llm.py                -- OpenRouter client
+              llm.py                -- Edgee client
               memory.py             -- scratchpad, identity, chat
               review.py             -- code metrics
               utils.py              -- utilities
@@ -78,7 +78,7 @@ Telegram --> colab_launcher.py
 
 | Key | Required | Where to get it |
 |-----|----------|-----------------|
-| `OPENROUTER_API_KEY` | Yes | [openrouter.ai/keys](https://openrouter.ai/keys) -- Create an account, add credits, generate a key |
+| `EDGEE_API_KEY` | Yes | [edgee.ai](https://www.edgee.ai/docs/introduction) -- Create an account and generate a gateway key |
 | `TELEGRAM_BOT_TOKEN` | Yes | [@BotFather](https://t.me/BotFather) on Telegram (see Step 1) |
 | `TOTAL_BUDGET` | Yes | Your spending limit in USD (e.g. `50`) |
 | `GITHUB_TOKEN` | Yes | [github.com/settings/tokens](https://github.com/settings/tokens) -- Generate a classic token with `repo` scope |
@@ -104,12 +104,12 @@ CFG = {
     "GITHUB_USER": "YOUR_GITHUB_USERNAME",                       # <-- CHANGE THIS
     "GITHUB_REPO": "ouroboros",                                  # <-- repo name (after fork)
     # Models
-    "OUROBOROS_MODEL": "anthropic/claude-sonnet-4.6",            # primary LLM (via OpenRouter)
+    "OUROBOROS_MODEL": "gpt-5.2",                                 # primary LLM (via Edgee)
     "OUROBOROS_MODEL_CODE": "anthropic/claude-sonnet-4.6",       # code editing (Claude Code CLI)
     "OUROBOROS_MODEL_LIGHT": "google/gemini-3-pro-preview",      # consciousness + lightweight tasks
     "OUROBOROS_WEBSEARCH_MODEL": "gpt-5",                        # web search (OpenAI Responses API)
     # Fallback chain (first model != active will be used on empty response)
-    "OUROBOROS_MODEL_FALLBACK_LIST": "anthropic/claude-sonnet-4.6,google/gemini-3-pro-preview,openai/gpt-4.1",
+    "OUROBOROS_MODEL_FALLBACK_LIST": "gpt-5.2,claude-sonnet-4.5,gemini-2.5-pro",
     # Infrastructure
     "OUROBOROS_MAX_WORKERS": "5",
     "OUROBOROS_MAX_ROUNDS": "200",                               # max LLM rounds per task
@@ -179,7 +179,7 @@ Full text: [BIBLE.md](BIBLE.md)
 
 | Variable | Description |
 |----------|-------------|
-| `OPENROUTER_API_KEY` | OpenRouter API key for LLM calls |
+| `EDGEE_API_KEY` | Edgee API key for LLM calls |
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot API token |
 | `TOTAL_BUDGET` | Spending limit in USD |
 | `GITHUB_TOKEN` | GitHub personal access token with `repo` scope |
@@ -197,14 +197,14 @@ Full text: [BIBLE.md](BIBLE.md)
 |----------|---------|-------------|
 | `GITHUB_USER` | *(required in config cell)* | GitHub username |
 | `GITHUB_REPO` | `ouroboros` | GitHub repository name |
-| `OUROBOROS_MODEL` | `anthropic/claude-sonnet-4.6` | Primary LLM model (via OpenRouter) |
-| `OUROBOROS_MODEL_CODE` | `anthropic/claude-sonnet-4.6` | Model for code editing tasks |
+| `OUROBOROS_MODEL` | `gpt-5.2` | Primary LLM model (via Edgee) |
+| `OUROBOROS_MODEL_CODE` | `gpt-5.2` | Model for code editing tasks |
 | `OUROBOROS_MODEL_LIGHT` | `google/gemini-3-pro-preview` | Model for lightweight tasks (dedup, compaction) |
 | `OUROBOROS_WEBSEARCH_MODEL` | `gpt-5` | Model for web search (OpenAI Responses API) |
 | `OUROBOROS_MAX_WORKERS` | `5` | Maximum number of parallel worker processes |
 | `OUROBOROS_BG_BUDGET_PCT` | `10` | Percentage of total budget allocated to background consciousness |
 | `OUROBOROS_MAX_ROUNDS` | `200` | Maximum LLM rounds per task |
-| `OUROBOROS_MODEL_FALLBACK_LIST` | `google/gemini-2.5-pro-preview,openai/o3,anthropic/claude-sonnet-4.6` | Fallback model chain for empty responses |
+| `OUROBOROS_MODEL_FALLBACK_LIST` | `gpt-5.2,claude-sonnet-4.5,gemini-2.5-pro` | Fallback model chain for empty responses |
 
 ---
 
@@ -251,7 +251,7 @@ Full text: [BIBLE.md](BIBLE.md)
 - New `forward_to_worker` tool: LLM decides when to forward messages to workers (Bible P3: LLM-first).
 - Per-task mailbox: `owner_inject.py` redesigned with per-task files, message IDs, dedup via seen_ids set.
 - Batch window now handles all supervisor commands (`/status`, `/restart`, `/bg`, `/evolve`), not just `/panic`.
-- **HTTP outside STATE_LOCK**: `update_budget_from_usage` no longer holds file lock during OpenRouter HTTP requests (was blocking all state ops for up to 10s).
+- **HTTP outside STATE_LOCK**: `update_budget_from_usage` no longer holds file lock during provider HTTP requests (was blocking all state ops for up to 10s).
 - **ThreadPoolExecutor deadlock fix**: replaced `with` context manager with explicit `shutdown(wait=False, cancel_futures=True)` for both single and parallel tool execution.
 - **Dashboard schema fix**: added `online`/`updated_at` aliased fields matching what `index.html` expects.
 - **BG consciousness spending**: now written to global `state.json` (was memory-only, invisible to budget tracking).
@@ -321,7 +321,7 @@ Full text: [BIBLE.md](BIBLE.md)
 - 101 tests green (+10 VLM tests).
 
 ### v5.0.2 -- DeepSeek Ban + Desync Fix
-- DeepSeek removed from `fetch_openrouter_pricing` prefixes (banned per creator directive).
+- DeepSeek removed from provider pricing prefixes (banned per creator directive).
 - Desync bug fix: owner messages during running tasks now forwarded via Drive-based mailbox (`owner_inject.py`).
 - Worker loop checks Drive mailbox every round -- injected as user messages into context.
 - Only affects worker tasks (not direct chat, which uses in-memory queue).

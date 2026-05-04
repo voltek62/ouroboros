@@ -13,7 +13,7 @@ import os
 import pathlib
 import time
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 log = logging.getLogger(__name__)
 
@@ -208,7 +208,7 @@ def init_state() -> Dict[str, Any]:
     """
     Initialize state at session start, capturing snapshots for budget drift detection.
 
-    Fetches OpenRouter ground truth and stores session_daily_snapshot and
+    Fetches provider ground truth and stores session_daily_snapshot and
     session_spent_snapshot for drift calculation.
     """
     lock_fd = acquire_file_lock(STATE_LOCK_PATH)
@@ -218,13 +218,17 @@ def init_state() -> Dict[str, Any]:
         # Capture session snapshots for drift detection
         st["session_spent_snapshot"] = float(st.get("spent_usd") or 0.0)
 
-        # Fetch OpenRouter ground truth to capture total_usd baseline
-        ground_truth = check_openrouter_ground_truth()
+        # Fetch provider ground truth to capture total_usd baseline
+        ground_truth = check_provider_ground_truth()
         if ground_truth is not None:
             st["session_total_snapshot"] = ground_truth["total_usd"]
+            st["edgee_total_usd"] = ground_truth["total_usd"]
+            st["edgee_daily_usd"] = ground_truth["daily_usd"]
+            st["edgee_last_check_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            # Keep legacy fields for backward compatibility with older sessions/tools.
             st["openrouter_total_usd"] = ground_truth["total_usd"]
             st["openrouter_daily_usd"] = ground_truth["daily_usd"]
-            st["openrouter_last_check_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            st["openrouter_last_check_at"] = st["edgee_last_check_at"]
         else:
             # If we can't fetch ground truth, use 0 as baseline
             st["session_total_snapshot"] = 0.0
@@ -261,7 +265,7 @@ def budget_remaining(st: Dict[str, Any]) -> float:
     return max(0.0, total - spent)
 
 
-def check_openrouter_ground_truth() -> Optional[Dict[str, float]]:
+def check_provider_ground_truth() -> Optional[Dict[str, float]]:
     """
     Legacy compatibility shim for provider ground-truth usage.
 
@@ -269,6 +273,11 @@ def check_openrouter_ground_truth() -> Optional[Dict[str, float]]:
     previous OpenRouter integration, so we skip ground-truth checks for now.
     """
     return None
+
+
+# Backward compatibility for legacy imports/calls.
+def check_openrouter_ground_truth() -> Optional[Dict[str, float]]:
+    return check_provider_ground_truth()
 
 
 def budget_pct(st: Dict[str, Any]) -> float:
@@ -286,7 +295,7 @@ def update_budget_from_usage(usage: Dict[str, Any]) -> None:
     Uses a single lock scope for the read-modify-write cycle to prevent
     concurrent writes from losing budget updates.
 
-    Every 50 calls, fetches OpenRouter ground truth for comparison.
+    Every 50 calls, fetches provider ground truth for comparison.
     """
     def _to_float(v: Any, default: float = 0.0) -> float:
         try:
@@ -323,16 +332,20 @@ def update_budget_from_usage(usage: Dict[str, Any]) -> None:
     finally:
         release_file_lock(STATE_LOCK_PATH, lock_fd)
 
-    # Step 2: HTTP to OpenRouter OUTSIDE the lock (can take up to 10s)
+    # Step 2: HTTP to provider OUTSIDE the lock (can take up to 10s)
     if should_check_ground_truth:
-        ground_truth = check_openrouter_ground_truth()
+        ground_truth = check_provider_ground_truth()
         if ground_truth is not None:
             lock_fd = acquire_file_lock(STATE_LOCK_PATH)
             try:
                 st = _load_state_unlocked()
+                st["edgee_total_usd"] = ground_truth["total_usd"]
+                st["edgee_daily_usd"] = ground_truth["daily_usd"]
+                st["edgee_last_check_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                # Keep legacy fields for backward compatibility with older sessions/tools.
                 st["openrouter_total_usd"] = ground_truth["total_usd"]
                 st["openrouter_daily_usd"] = ground_truth["daily_usd"]
-                st["openrouter_last_check_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                st["openrouter_last_check_at"] = st["edgee_last_check_at"]
 
                 session_total_snap = st.get("session_total_snapshot")
                 session_spent_snap = st.get("session_spent_snapshot")
@@ -594,16 +607,18 @@ def status_text(workers_dict: Dict[int, Any], pending_list: list, running_dict: 
     if drift_pct is not None:
         session_total_snap = st.get("session_total_snapshot")
         session_spent_snap = st.get("session_spent_snapshot")
-        or_total = st.get("openrouter_total_usd")
+        provider_total = st.get("edgee_total_usd")
+        if provider_total is None:
+            provider_total = st.get("openrouter_total_usd")
 
-        if session_total_snap is not None and session_spent_snap is not None and or_total is not None:
-            or_delta = or_total - session_total_snap
+        if session_total_snap is not None and session_spent_snap is not None and provider_total is not None:
+            provider_delta = provider_total - session_total_snap
             our_delta = spent - session_spent_snap
 
             drift_icon = " ⚠️" if st.get("budget_drift_alert") else ""
             lines.append(
                 f"budget_drift: {drift_pct:.1f}%{drift_icon} "
-                f"(tracked: ${our_delta:.2f} vs provider: ${or_delta:.2f})"
+                f"(tracked: ${our_delta:.2f} vs provider: ${provider_delta:.2f})"
             )
 
     # Model breakdown

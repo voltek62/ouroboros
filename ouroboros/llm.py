@@ -35,7 +35,7 @@ def add_usage(total: Dict[str, Any], usage: Dict[str, Any]) -> None:
         total["cost"] = float(total.get("cost") or 0) + float(usage["cost"])
 
 
-def fetch_edgee_pricing() -> Dict[str, Tuple[float, float, float]]:
+def fetch_provider_pricing() -> Dict[str, Tuple[float, float, float]]:
     """
     Fetch current pricing from Edgee Models API.
 
@@ -158,7 +158,7 @@ class LLMClient:
                 usage["cached_tokens"] = int(prompt_details["cached_tokens"])
 
         # Extract cache_write_tokens from prompt_tokens_details if available
-        # OpenRouter: "cache_write_tokens"
+        # Provider-specific cache-write fields
         # Native Anthropic: "cache_creation_tokens" or "cache_creation_input_tokens"
         if not usage.get("cache_write_tokens"):
             prompt_details_for_write = usage.get("prompt_tokens_details") or {}
@@ -240,5 +240,10 @@ class LLMClient:
 
 
 # Backward compatibility for existing imports.
+def fetch_edgee_pricing() -> Dict[str, Tuple[float, float, float]]:
+    return fetch_provider_pricing()
+
+
+# Backward compatibility for existing imports.
 def fetch_openrouter_pricing() -> Dict[str, Tuple[float, float, float]]:
-    return fetch_edgee_pricing()
+    return fetch_provider_pricing()

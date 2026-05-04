@@ -76,8 +76,8 @@ def _get_pricing() -> Dict[str, Tuple[float, float, float]]:
         _cached_pricing = dict(_MODEL_PRICING_STATIC)
 
         try:
-            from ouroboros.llm import fetch_openrouter_pricing
-            _live = fetch_openrouter_pricing()
+            from ouroboros.llm import fetch_provider_pricing
+            _live = fetch_provider_pricing()
             if _live and len(_live) > 5:
                 _cached_pricing.update(_live)
         except Exception as e:
