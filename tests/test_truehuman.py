@@ -335,3 +335,19 @@ def test_cycle_37_room_synthesis_accepts_commit_and_session_continuity_surfaces_
     assert state["secondary_drive"] == "M"
     assert "recent commits" in state["rationale"].lower()
     assert "session state" in state["rationale"].lower()
+
+
+def test_cycle_38_contract_stays_sentinel_first_and_anticipation_with_continuity_surfaces_and_zero_tool_drift():
+    msg = (
+        "EVOLUTION # 38 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: "
+        "read room from latest creator messages, recent commits, identity.md, current session state. "
+        "Pick phase anticipation / release / block. Choose ONE concrete, phase-aware action. "
+        "Execute. Cycles produce zero tool calls drift unless showing why non-action is right. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric. "
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
