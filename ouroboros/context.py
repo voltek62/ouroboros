@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import pathlib
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 from ouroboros.utils import (
@@ -20,6 +21,75 @@ from ouroboros.utils import (
 from ouroboros.memory import Memory
 
 log = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# TrueHuman / PentaDrive doctrine loader (BIBLE §4.5 fallback path)
+# ---------------------------------------------------------------------------
+
+_TRUEHUMAN_URL = (
+    "https://huggingface.co/spaces/datamarketinglabs/truehuman-playground/"
+    "resolve/main/llms-full.txt"
+)
+_TRUEHUMAN_CACHE_TTL_SEC = 7 * 24 * 3600  # 1 week
+_TRUEHUMAN_INMEM_CACHE: Optional[str] = None
+
+
+def _load_truehuman_doctrine(env: Any) -> str:
+    """Return the PentaDrive operational contract as plain text.
+
+    Cached in memory (per worker process) and on disk under
+    `<drive_root>/cache/truehuman-llms-full.txt`. Refreshed via HTTP at most
+    once per `_TRUEHUMAN_CACHE_TTL_SEC`. On network failure, falls back to
+    whatever is on disk (even if stale). Returns "" only when both network
+    and cache are unavailable — the BIBLE already documents the framework,
+    so missing this block is not catastrophic.
+    """
+    global _TRUEHUMAN_INMEM_CACHE
+    if _TRUEHUMAN_INMEM_CACHE is not None:
+        return _TRUEHUMAN_INMEM_CACHE
+
+    try:
+        cache_path = env.drive_path("cache/truehuman-llms-full.txt")
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        log.debug("TrueHuman cache dir unavailable", exc_info=True)
+        _TRUEHUMAN_INMEM_CACHE = ""
+        return ""
+
+    cached: Optional[str] = None
+    cache_age_sec: float = float("inf")
+    if cache_path.exists():
+        try:
+            cached = cache_path.read_text(encoding="utf-8")
+            cache_age_sec = max(0.0, time.time() - cache_path.stat().st_mtime)
+        except Exception:
+            cached = None
+
+    if cached and cache_age_sec < _TRUEHUMAN_CACHE_TTL_SEC:
+        _TRUEHUMAN_INMEM_CACHE = cached
+        return cached
+
+    try:
+        import requests
+        resp = requests.get(_TRUEHUMAN_URL, timeout=5)
+        resp.raise_for_status()
+        text = resp.text
+        if text and text.strip():
+            tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
+            tmp.write_text(text, encoding="utf-8")
+            tmp.replace(cache_path)
+            _TRUEHUMAN_INMEM_CACHE = text
+            return text
+    except Exception:
+        log.debug("Failed to fetch TrueHuman doctrine, falling back to cache",
+                  exc_info=True)
+
+    if cached:
+        _TRUEHUMAN_INMEM_CACHE = cached
+        return cached
+    _TRUEHUMAN_INMEM_CACHE = ""
+    return ""
 
 
 def _build_user_content(task: Dict[str, Any]) -> Any:
@@ -326,6 +396,17 @@ def build_llm_messages(
         base_prompt + "\n\n"
         + "## BIBLE.md\n\n" + clip_text(bible_md, 180000)
     )
+
+    # TrueHuman / PentaDrive operational contract (BIBLE §4.5 — canonical
+    # fallback path). Empty on first-run network failure; BIBLE §4 still
+    # carries the principles in plain language.
+    truehuman_doctrine = _load_truehuman_doctrine(env)
+    if truehuman_doctrine.strip():
+        static_text += (
+            "\n\n## TrueHuman / PentaDrive — operational contract\n\n"
+            + clip_text(truehuman_doctrine, 50000)
+        )
+
     if needs_full_context:
         static_text += "\n\n## README.md\n\n" + clip_text(readme_md, 180000)
 

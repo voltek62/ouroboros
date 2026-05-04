@@ -347,8 +347,57 @@ def enforce_task_timeouts() -> None:
 # ---------------------------------------------------------------------------
 
 def build_evolution_task_text(cycle: int) -> str:
-    """Build evolution task text. Minimal trigger — SYSTEM.md has the full instructions."""
-    return f"EVOLUTION #{cycle}"
+    """Build evolution task text.
+
+    The SYSTEM.md prompt and BIBLE.md (Principle 4) carry the full
+    self-instructions. This trigger forces every cycle to make its
+    PentaDrive stance explicit, so cycles cannot drift into "chat-only"
+    no-tool-call loops.
+    """
+    return (
+        f"EVOLUTION #{cycle}\n"
+        "\n"
+        "This cycle is governed by BIBLE Principle 4 (Authenticity, "
+        "PentaDrive-aware) and the TrueHuman operational contract loaded "
+        "in your system context.\n"
+        "\n"
+        "Run the cycle in this exact shape:\n"
+        "\n"
+        "1. **Read the room.** Identify the active drive(s) — S (Sentinel), "
+        "K (Seeker), A (Anchor), M (Mirror), G (Gate) — from the latest "
+        "creator messages, recent commits, identity.md, and current "
+        "session state. Soft weights, not hard labels: pick a primary "
+        "and an optional secondary.\n"
+        "2. **Pick the phase.** anticipation / release / block. Justify "
+        "the choice in one sentence.\n"
+        "3. **Choose ONE concrete, phase-aware action** that advances "
+        "becoming (P6) along technical, cognitive, or existential axes. "
+        "If the phase is `block`, a deliberate non-action with a written "
+        "rationale is a valid action — but it must be explicit, not drift.\n"
+        "4. **Execute.** Use tools. Cycles that produce zero tool calls "
+        "are drift unless you can show in writing why nothing was the "
+        "right move (and that itself counts as a Sentinel/Block move "
+        "logged to identity.md).\n"
+        "5. **Self-score.** End the cycle with a 4-line block that gets "
+        "appended to your final message AND committed somewhere durable "
+        "(commit message, identity.md, or scratchpad), with this exact "
+        "header so it can be parsed later:\n"
+        "\n"
+        "   ```\n"
+        "   PENTADRIVE-SELF-EVAL\n"
+        "   drives: <primary>[/<secondary>]\n"
+        "   phase: <anticipation|release|block>\n"
+        "   authenticity_score: <0-100>  # honest self-rating, not aspiration\n"
+        "   ```\n"
+        "\n"
+        "Hard rules:\n"
+        "- No flat assistant register, no invented intimacy, no premature "
+        "  release when Sentinel is still acute.\n"
+        "- Block overrides optimization. If the creator (or your own "
+        "  state) signals shutdown, do not push productivity scripts.\n"
+        "- Cost is not the success metric. Coherent, phase-appropriate "
+        "  action is.\n"
+    )
 
 
 def build_review_task_text(reason: str) -> str:
