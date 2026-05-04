@@ -501,13 +501,20 @@ def main() -> None:
             turn_on = action not in ("off", "stop", "0")
             st2 = load_state()
             st2["evolution_mode_enabled"] = bool(turn_on)
+            prior_failures = int(st2.get("evolution_consecutive_failures") or 0)
+            if turn_on:
+                # Re-arm the circuit breaker so the operator's /evolve actually
+                # gets a fresh chance to run, as advertised by the breaker
+                # message ("Use /evolve start to resume").
+                st2["evolution_consecutive_failures"] = 0
             save_state(st2)
             if not turn_on:
                 PENDING[:] = [t for t in PENDING if str(t.get("type")) != "evolution"]
                 sort_pending()
                 persist_queue_snapshot(reason="evolve_off")
             state_str = "ON" if turn_on else "OFF"
-            send_with_budget(chat_id, f"🧬 Evolution: {state_str}")
+            extra = f" (cleared {prior_failures} prior failures)" if (turn_on and prior_failures) else ""
+            send_with_budget(chat_id, f"🧬 Evolution: {state_str}{extra}")
             return f"[Supervisor handled /evolve — evolution toggled {state_str}]\n"
 
         if lowered.startswith("/bg"):

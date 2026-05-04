@@ -62,13 +62,10 @@ def fetch_provider_pricing() -> Dict[str, Tuple[float, float, float]]:
 
         models = resp.json().get("data", [])
 
-        # Prefixes we care about
-        prefixes = ("anthropic/", "openai/", "google/", "meta-llama/", "x-ai/", "qwen/")
-
         pricing_dict = {}
         for model in models:
             model_id = model.get("id", "")
-            if not model_id.startswith(prefixes):
+            if not model_id:
                 continue
 
             pricing = model.get("pricing") or {}
@@ -89,6 +86,11 @@ def fetch_provider_pricing() -> Dict[str, Tuple[float, float, float]]:
                 cached_price = round(prompt_price * 0.1, 4)
 
             pricing_dict[model_id] = (prompt_price, cached_price, completion_price)
+            # Also index "bare" ids (without provider prefix) so e.g. "gpt-5.4"
+            # resolves the same as "openai/gpt-5.4". First entry wins.
+            if "/" in model_id:
+                bare = model_id.split("/", 1)[1]
+                pricing_dict.setdefault(bare, (prompt_price, cached_price, completion_price))
 
         log.info("Fetched pricing for %d models from Edgee", len(pricing_dict))
         return pricing_dict

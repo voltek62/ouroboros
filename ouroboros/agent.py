@@ -520,6 +520,8 @@ class OuroborosAgent:
             "total_rounds": int(usage.get("rounds") or 0),
             "prompt_tokens": int(usage.get("prompt_tokens") or 0),
             "completion_tokens": int(usage.get("completion_tokens") or 0),
+            "tool_calls": n_tool_calls,
+            "tool_errors": n_tool_errors,
             "ts": utc_now_iso(),
         })
         append_jsonl(drive_logs / "events.jsonl", {
@@ -531,6 +533,8 @@ class OuroborosAgent:
             "total_rounds": int(usage.get("rounds") or 0),
             "prompt_tokens": int(usage.get("prompt_tokens") or 0),
             "completion_tokens": int(usage.get("completion_tokens") or 0),
+            "tool_calls": n_tool_calls,
+            "tool_errors": n_tool_errors,
         })
 
         # Store task result for parent task retrieval

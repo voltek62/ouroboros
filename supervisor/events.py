@@ -91,24 +91,36 @@ def _handle_task_done(evt: Dict[str, Any], ctx: Any) -> None:
     task_type = str(evt.get("task_type") or "")
     wid = evt.get("worker_id")
 
-    # Track evolution task success/failure for circuit breaker
+    # Track evolution task success/failure for circuit breaker.
+    # We don't trust `cost_usd` alone — pricing can be missing/zero for some
+    # models even when the LLM ran successfully. Use token usage and
+    # tool-call activity as the primary signal, with cost as a hint.
     if task_type == "evolution":
         st = ctx.load_state()
-        # Check if task produced meaningful output (successful evolution)
-        # A successful evolution should have:
-        # - Reasonable cost (not near-zero, indicating actual work)
-        # - Multiple rounds (not just 1 retry)
         cost = float(evt.get("cost_usd") or 0)
         rounds = int(evt.get("total_rounds") or 0)
+        prompt_tokens = int(evt.get("prompt_tokens") or 0)
+        completion_tokens = int(evt.get("completion_tokens") or 0)
+        tool_calls = int(evt.get("tool_calls") or 0)
 
-        # Heuristic: if cost > $0.10 and rounds >= 1, consider it successful
-        # Empty responses typically cost < $0.01 and have 0-1 rounds
-        if cost > 0.10 and rounds >= 1:
-            # Success: reset failure counter
+        # An evolution counts as a real attempt if the LLM was actually
+        # exercised: meaningful completion length OR tool activity OR
+        # multiple rounds OR non-trivial cost.
+        succeeded = (
+            rounds >= 1
+            and (
+                cost > 0.05
+                or tool_calls > 0
+                or completion_tokens >= 50
+                or rounds >= 2
+            )
+            and prompt_tokens > 0
+        )
+
+        if succeeded:
             st["evolution_consecutive_failures"] = 0
             ctx.save_state(st)
         else:
-            # Likely failure (empty response or minimal work)
             failures = int(st.get("evolution_consecutive_failures") or 0) + 1
             st["evolution_consecutive_failures"] = failures
             ctx.save_state(st)
@@ -121,6 +133,9 @@ def _handle_task_done(evt: Dict[str, Any], ctx: Any) -> None:
                     "consecutive_failures": failures,
                     "cost_usd": cost,
                     "rounds": rounds,
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "tool_calls": tool_calls,
                 },
             )
 

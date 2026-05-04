@@ -40,6 +40,24 @@ _MODEL_PRICING_STATIC = {
     "openai/gpt-5.2-codex": (1.75, 0.175, 14.0),
     "gpt-5.2": (1.75, 0.175, 14.0),
     "gpt-5.2-codex": (1.75, 0.175, 14.0),
+    # Newer GPT-5.x family. Edgee currently returns pricing=null for all
+    # OpenAI models, so these are estimates aligned with the gpt-5.2 tier
+    # (flagship) and gpt-5-mini tier (smaller models). Adjust if/when Edgee
+    # starts returning real pricing or OpenAI publishes different rates.
+    "openai/gpt-5.3-codex": (1.75, 0.175, 14.0),
+    "gpt-5.3-codex": (1.75, 0.175, 14.0),
+    "openai/gpt-5.4": (1.75, 0.175, 14.0),
+    "gpt-5.4": (1.75, 0.175, 14.0),
+    "openai/gpt-5.4-mini": (0.50, 0.05, 4.0),
+    "gpt-5.4-mini": (0.50, 0.05, 4.0),
+    "openai/gpt-5.4-nano": (0.10, 0.01, 0.80),
+    "gpt-5.4-nano": (0.10, 0.01, 0.80),
+    "openai/gpt-5.5": (1.75, 0.175, 14.0),
+    "gpt-5.5": (1.75, 0.175, 14.0),
+    "openai/gpt-5-mini": (0.50, 0.05, 4.0),
+    "gpt-5-mini": (0.50, 0.05, 4.0),
+    "openai/gpt-5-nano": (0.10, 0.01, 0.80),
+    "gpt-5-nano": (0.10, 0.01, 0.80),
     "claude-sonnet-4.5": (3.0, 0.30, 15.0),
     "claude-sonnet-4.6": (3.0, 0.30, 15.0),
     "gemini-2.5-pro": (1.25, 0.125, 10.0),
