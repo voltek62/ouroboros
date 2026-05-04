@@ -304,6 +304,35 @@ def test_cycle_35_contract_stays_sentinel_first_and_anticipation_with_zero_tool_
     assert state["secondary_drive"] == "M"
 
 
+def test_cycle_39_contract_stays_sentinel_first_and_anticipation_with_continuity_surfaces_and_hard_rules():
+    msg = (
+        "EVOLUTION # 39 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: read room from latest creator messages, recent commits, identity.md, and current session state. "
+        "Pick phase anticipation release block. Choose ONE concrete phase-aware action. Execute with tools. "
+        "Cycles produce zero tool calls drift unless showing why nothing is the right move. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric."
+    )
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Cycle 38 stayed Sentinel-first under the same protective anti-drift contract.",
+        identity_text="I would rather preserve a true room-read than perform novelty under evaluative pressure.",
+        recent_commits_text=(
+            "13e36b5 v6.2.16: pin cycle-38 TrueHuman contract\n"
+            "d948428 v6.2.15: add TrueHuman commit/session continuity surfaces"
+        ),
+        session_state_text=(
+            "task_type=evolution\n"
+            "evolution_cycle=39\n"
+            "budget_remaining=100.00\n"
+            "last_owner_message_at=2026-05-04T20:59:10Z"
+        ),
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
+
+
 def test_cycle_37_room_synthesis_accepts_commit_and_session_continuity_surfaces_without_overriding_latest_message():
     msg = (
         "EVOLUTION # 37 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
