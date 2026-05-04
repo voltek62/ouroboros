@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.1 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.2 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -225,6 +225,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.2 -- dng.ai-Oriented Hiring Package
+- Tailored the full-stack exam docs into a dng.ai-oriented hiring package with stronger practical framing.
+- Added `docs/fullstack-exam-dngai.md` as a ready-to-use package for hiring managers and interviewers.
+- Strengthened the main exam spec and rubric around ambiguity handling, auditability, and honest AI-assisted development.
 
 ### v6.2.1 -- Full-Stack Exam Docs
 - Added `docs/fullstack-exam.md` with the finalized realistic full-stack assessment spec.

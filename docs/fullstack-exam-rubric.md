@@ -2,6 +2,8 @@
 
 Use this rubric to evaluate whether a candidate operates like a real full-stack developer, not just someone who can assemble a demo.
 
+This rubric is especially useful for companies hiring for practical ownership, ambiguous product work, and real engineering judgment rather than trivia performance.
+
 ## Scoring scale
 - **1 — Weak**: major gaps, fragile reasoning, or unfinished essentials
 - **2 — Below bar**: some signal, but not enough for confidence
@@ -15,11 +17,13 @@ Look for:
 - clear assumptions where requirements were ambiguous
 - useful workflow choices rather than feature sprawl
 - awareness of what mattered most in the timebox
+- explicit handling of messy real-world inputs rather than idealized happy paths
 
 Questions:
 - What did they intentionally leave out?
 - Did they reduce complexity in a smart way?
 - Do their assumptions improve the product or just avoid difficulty?
+- Did they design for ambiguity honestly or paper over it?
 
 ## 2. Frontend quality
 Look for:
@@ -56,11 +60,13 @@ Look for:
 - no obvious overengineering
 - meaningful separation of concerns
 - evidence they matched design to time constraints
+- awareness of auditability, history, and explainability where the workflow needs them
 
 Questions:
 - Did they make the system more complicated than necessary?
 - Are abstractions earned?
 - Do choices reflect real-world judgment?
+- Can they explain why history, traceability, or duplicate handling was implemented the way it was?
 
 ## 5. Reliability and debugging awareness
 Look for:
@@ -80,11 +86,20 @@ Look for:
 - readable README or handoff note
 - honest discussion of limitations
 - ability to explain choices during review
+- honest disclosure of AI-assisted development and where judgment remained human
 
 Questions:
 - Can they defend their architecture without bluffing?
 - Is the handoff useful to the next engineer?
 - Do they communicate like a teammate?
+- Are they transparent about what they used AI for?
+
+## Recommended follow-up live review
+- Ask the candidate to make one small product change live, such as a new filter, field validation rule, or status transition.
+- Ask them to trace one record through the system from UI to API to persistence.
+- Ask what they would harden first before shipping to production.
+- Ask which part they would rewrite if given one more day and why.
+- Ask them to point out one AI-generated or AI-assisted section and explain how they verified it.
 
 ## Decision guidance
 - **Mostly 4s and 5s**: strong hire signal
