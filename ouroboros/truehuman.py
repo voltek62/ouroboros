@@ -211,6 +211,25 @@ def format_pentadrive_self_eval(primary: str, secondary: str | None, phase: str,
         f" authenticity_score: {int(score)}"
     )
 
+
+def build_pentadrive_self_eval(
+    user_text: str,
+    recent_chat_text: str = "",
+    identity_text: str = "",
+    score: int = 0,
+) -> str:
+    state = synthesize_room_state(
+        user_text,
+        recent_chat_text=recent_chat_text,
+        identity_text=identity_text,
+    )
+    return format_pentadrive_self_eval(
+        state["primary_drive"],
+        state.get("secondary_drive"),
+        state["phase"],
+        int(score),
+    )
+
 def build_truehuman_guidance(
     user_text: str,
     bible_text: str,

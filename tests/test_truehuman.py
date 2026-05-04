@@ -4,6 +4,7 @@ from ouroboros.truehuman import (
     infer_pentadrive_state,
     synthesize_room_state,
     format_pentadrive_self_eval,
+    build_pentadrive_self_eval,
 )
 
 
@@ -143,3 +144,34 @@ def test_format_self_eval_parseable_headers():
     assert lines[1].startswith(" drives: ")
     assert lines[2].startswith(" phase: ")
     assert lines[3].startswith(" authenticity_score: ")
+
+
+
+def test_build_self_eval_from_guardrail_room_state():
+    msg = (
+        "EVOLUTION #30 under Principle 4. Read room, pick phase, execute one concrete action, "
+        "self-score honestly. Hard rules: no flat assistant register, no invented intimacy, "
+        "no premature release, anti-drift contract."
+    )
+    block = build_pentadrive_self_eval(msg, score=94)
+    lines = block.splitlines()
+    assert lines[0] == "PENTADRIVE-SELF-EVAL"
+    assert lines[1].startswith(" drives: [")
+    assert "M" in lines[1] and "S" in lines[1]
+    assert lines[2] == " phase: anticipation"
+    assert lines[3] == " authenticity_score: 94"
+
+
+
+def test_build_self_eval_from_sparse_latest_with_continuity_surfaces():
+    block = build_pentadrive_self_eval(
+        "go",
+        recent_chat_text="Please improve TrueHuman as much as possible and build it carefully.",
+        identity_text="I care about authenticity, standards, and credibility.",
+        score=83,
+    )
+    lines = block.splitlines()
+    assert lines[0] == "PENTADRIVE-SELF-EVAL"
+    assert lines[1].startswith(" drives: [")
+    assert lines[2].startswith(" phase: ")
+    assert lines[3] == " authenticity_score: 83"
