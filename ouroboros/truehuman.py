@@ -56,6 +56,9 @@ BLOCK_INSTRUCTION_PATTERNS = (
     "phase: anticipation | release | block",
     "anticipation / release / block",
     "block overrides optimization",
+    "creator state signals shutdown",
+    "if creator state signals shutdown",
+    "signals shutdown, not push productivity scripts",
 )
 RELEASE_CUES = {
     "done", "finished", "it worked", "we did it", "resolved", "decided", "landed", "relief",
