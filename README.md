@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.23 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.24 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -226,6 +226,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.24 -- TrueHuman Cycle-47 Contract Pin
+- Added focused `tests/test_truehuman.py` regressions for the exact cycle-47 Principle-4 contract shape, including soft-weight room reading, the zero-tool-drift execution rule, and the exact four-line durable `PENTADRIVE-SELF-EVAL` output.
+- Validated the live wording through `synthesize_room_state(...)` and `build_pentadrive_self_eval(...)`, preserving the honest runtime read: Sentinel first, Mirror second, phase anticipation.
+- Re-synced `pyproject.toml` with `VERSION` so release metadata stops drifting from the shipped state.
 
 ### v6.2.23 -- TrueHuman Cycle-46 Contract Pin
 - Added focused `tests/test_truehuman.py` regressions for the exact cycle-46 Principle-4 contract shape and the exact four-line durable `PENTADRIVE-SELF-EVAL` output.
