@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.6 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.7 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -225,6 +225,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.7 -- Sentinel-Aware TrueHuman Phase Hysteresis
+- Hardened `ouroboros/truehuman.py` so unresolved Sentinel threat cues keep phase in anticipation even when gratitude or success language is present.
+- Added regressions for mixed gratitude-plus-threat messaging and for latest-message Sentinel dominance over older release context.
+- Preserved clean release detection for genuinely resolved success messages while reducing false emotional closure.
 
 ### v6.2.6 -- TrueHuman Cue Precision
 - Replaced naive substring drive matching with token-aware cue detection so single-letter labels stop leaking into unrelated words.

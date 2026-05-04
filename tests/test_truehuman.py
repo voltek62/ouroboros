@@ -23,6 +23,12 @@ def test_infer_release_on_success_gratitude():
     assert state["primary_drive"] in {"A", "K", "M"}
 
 
+def test_mixed_gratitude_and_threat_stays_anticipation():
+    state = infer_pentadrive_state("Thanks, but I'm still worried this could go wrong and the risk is real.")
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+
+
 def test_infer_block_on_shutdown():
     state = infer_pentadrive_state("Stop. I can't do this right now. It's too much.")
     assert state["phase"] == "block"
@@ -82,3 +88,13 @@ def test_principle4_cycle_message_reads_as_anticipation_with_mirror_pressure():
     state = infer_pentadrive_state(msg)
     assert state["phase"] == "anticipation"
     assert {state["primary_drive"], state.get("secondary_drive")} & {"M"}
+
+
+def test_latest_sentinel_message_beats_older_release_context():
+    state = synthesize_room_state(
+        "Thanks, but I'm still worried this could go wrong.",
+        recent_chat_text="We did it, thank you, proud, success.",
+        identity_text="I care about standards and credibility.",
+    )
+    assert state["phase"] == "anticipation"
+

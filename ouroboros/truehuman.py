@@ -102,12 +102,18 @@ def _infer_phase(text: str, drive_scores: Dict[str, int]) -> Tuple[str, str]:
     tokens = _tokenize(text)
     if any(_contains_cue(norm, tokens, cue) for cue in BLOCK_CUES):
         return "block", "Shutdown or refusal cues detected."
+
     release_hits = sum(1 for cue in RELEASE_CUES if _contains_cue(norm, tokens, cue))
     anticipation_hits = sum(1 for cue in ANTICIPATION_CUES if _contains_cue(norm, tokens, cue))
+    sentinel_threat_cues = ("what if", "worry", "worried", "afraid", "fear", "panic", "risk", "unsafe", "threat")
+    sentinel_active = any(_contains_cue(norm, tokens, cue) for cue in sentinel_threat_cues)
+
+    if sentinel_active and drive_scores.get("S", 0) >= 1:
+        return "anticipation", "Threat cues remain unresolved, so gratitude/success language does not close the moment."
+
     if release_hits > anticipation_hits and release_hits >= 1:
-        return "release", "Resolution/gratitude/success language is present."
-    if drive_scores.get("S", 0) >= 2 and any(_contains_cue(norm, tokens, tok) for tok in ("what if", "worry", "afraid", "risk", "unsafe")):
-        return "anticipation", "Threat cues remain unresolved."
+        return "release", "Resolution/gratitude/success language is present without unresolved threat cues."
+
     return "anticipation", "Defaulting to unresolved / pre-resolution stance."
 
 
