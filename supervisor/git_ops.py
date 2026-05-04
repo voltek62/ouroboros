@@ -300,7 +300,13 @@ def checkout_and_reset(branch: str, reason: str = "unspecified",
         )
         return False, msg
 
-    subprocess.run(["git", "checkout", branch], cwd=str(REPO_DIR), check=True)
+    # Use -B to force-create/reset the local branch from the remote ref, avoiding
+    # the "ambiguous argument" error when a path with the same name exists in the
+    # tree (e.g. the `ouroboros/` package collides with the `ouroboros` branch).
+    subprocess.run(
+        ["git", "checkout", "-B", branch, f"origin/{branch}"],
+        cwd=str(REPO_DIR), check=True,
+    )
     subprocess.run(["git", "reset", "--hard", f"origin/{branch}"], cwd=str(REPO_DIR), check=True)
     # Clean __pycache__ to prevent stale bytecode (git checkout may not update mtime)
     for p in REPO_DIR.rglob("__pycache__"):

@@ -1,13 +1,16 @@
 """
 Apply-patch shim for Claude Code CLI.
-Writes apply_patch script to /usr/local/bin/ on import.
+Writes apply_patch script to a system path when possible and falls back to
+user-local bin on permission-restricted systems.
 
 Supports: *** Update File, *** Add File, *** Delete File, *** End of File.
 """
+import os
 import pathlib
 
 
 APPLY_PATCH_PATH = pathlib.Path("/usr/local/bin/apply_patch")
+FALLBACK_APPLY_PATCH_PATH = pathlib.Path.home() / ".local" / "bin" / "apply_patch"
 APPLY_PATCH_CODE = r"""#!/usr/bin/env python3
 import os
 import sys
@@ -172,7 +175,18 @@ if __name__ == "__main__":
 
 
 def install():
-    """Install apply_patch script to /usr/local/bin/."""
-    APPLY_PATCH_PATH.parent.mkdir(parents=True, exist_ok=True)
-    APPLY_PATCH_PATH.write_text(APPLY_PATCH_CODE, encoding="utf-8")
-    APPLY_PATCH_PATH.chmod(0o755)
+    """Install apply_patch script with a user-local fallback."""
+    try:
+        APPLY_PATCH_PATH.parent.mkdir(parents=True, exist_ok=True)
+        APPLY_PATCH_PATH.write_text(APPLY_PATCH_CODE, encoding="utf-8")
+        APPLY_PATCH_PATH.chmod(0o755)
+    except PermissionError:
+        FALLBACK_APPLY_PATCH_PATH.parent.mkdir(parents=True, exist_ok=True)
+        FALLBACK_APPLY_PATCH_PATH.write_text(APPLY_PATCH_CODE, encoding="utf-8")
+        FALLBACK_APPLY_PATCH_PATH.chmod(0o755)
+
+        fallback_bin = str(FALLBACK_APPLY_PATCH_PATH.parent)
+        current_path = os.environ.get("PATH", "")
+        path_parts = current_path.split(":") if current_path else []
+        if fallback_bin not in path_parts:
+            os.environ["PATH"] = f"{fallback_bin}:{current_path}" if current_path else fallback_bin
