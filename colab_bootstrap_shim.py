@@ -35,8 +35,15 @@ def export_secret_to_env(name: str, required: bool = False) -> Optional[str]:
 
 
 # Export required runtime secrets so subprocess launcher can always read env fallback.
-for _name in ("OPENROUTER_API_KEY", "TELEGRAM_BOT_TOKEN", "TOTAL_BUDGET", "GITHUB_TOKEN"):
+export_secret_to_env("EDGEE_API_KEY", required=False)
+if not os.environ.get("EDGEE_API_KEY"):
+    legacy_or_key = export_secret_to_env("OPENROUTER_API_KEY", required=True)
+    os.environ["EDGEE_API_KEY"] = str(legacy_or_key or "")
+for _name in ("TELEGRAM_BOT_TOKEN", "TOTAL_BUDGET", "GITHUB_TOKEN"):
     export_secret_to_env(_name, required=True)
+# Backward compatibility for older scripts still expecting OPENROUTER_API_KEY.
+if not os.environ.get("OPENROUTER_API_KEY"):
+    os.environ["OPENROUTER_API_KEY"] = os.environ.get("EDGEE_API_KEY", "")
 
 # Optional secrets (keep empty if missing).
 for _name in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY"):

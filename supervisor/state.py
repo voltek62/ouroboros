@@ -263,31 +263,12 @@ def budget_remaining(st: Dict[str, Any]) -> float:
 
 def check_openrouter_ground_truth() -> Optional[Dict[str, float]]:
     """
-    Call OpenRouter API to get ground truth usage.
+    Legacy compatibility shim for provider ground-truth usage.
 
-    Returns dict with total_usd and daily_usd spent according to OpenRouter, or None on error.
+    Edgee does not expose the same lightweight usage endpoint used by the
+    previous OpenRouter integration, so we skip ground-truth checks for now.
     """
-    try:
-        import urllib.request
-        api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
-        if not api_key:
-            return None
-        req = urllib.request.Request(
-            "https://openrouter.ai/api/v1/auth/key",
-            headers={"Authorization": f"Bearer {api_key}"},
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        # OpenRouter API returns usage already in dollars (not cents)
-        usage_total = data.get("data", {}).get("usage", 0)
-        usage_daily = data.get("data", {}).get("usage_daily", 0)
-        return {
-            "total_usd": float(usage_total),
-            "daily_usd": float(usage_daily),
-        }
-    except Exception:
-        log.warning("Failed to fetch OpenRouter ground truth", exc_info=True)
-        return None
+    return None
 
 
 def budget_pct(st: Dict[str, Any]) -> float:
@@ -622,7 +603,7 @@ def status_text(workers_dict: Dict[int, Any], pending_list: list, running_dict: 
             drift_icon = " ⚠️" if st.get("budget_drift_alert") else ""
             lines.append(
                 f"budget_drift: {drift_pct:.1f}%{drift_icon} "
-                f"(tracked: ${our_delta:.2f} vs OpenRouter: ${or_delta:.2f})"
+                f"(tracked: ${our_delta:.2f} vs provider: ${or_delta:.2f})"
             )
 
     # Model breakdown

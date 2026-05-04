@@ -1,7 +1,7 @@
 """
 Ouroboros — LLM client.
 
-The only module that communicates with the LLM API (OpenRouter).
+The only module that communicates with the LLM API (Edgee).
 Contract: chat(), default_model(), available_models(), add_usage().
 """
 
@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 import os
-import time
 from typing import Any, Dict, List, Optional, Tuple
 
 log = logging.getLogger(__name__)
@@ -36,16 +35,13 @@ def add_usage(total: Dict[str, Any], usage: Dict[str, Any]) -> None:
         total["cost"] = float(total.get("cost") or 0) + float(usage["cost"])
 
 
-def fetch_openrouter_pricing() -> Dict[str, Tuple[float, float, float]]:
+def fetch_edgee_pricing() -> Dict[str, Tuple[float, float, float]]:
     """
-    Fetch current pricing from OpenRouter API.
+    Fetch current pricing from Edgee Models API.
 
     Returns dict of {model_id: (input_per_1m, cached_per_1m, output_per_1m)}.
     Returns empty dict on failure.
     """
-    import logging
-    log = logging.getLogger("ouroboros.llm")
-
     try:
         import requests
     except ImportError:
@@ -53,12 +49,18 @@ def fetch_openrouter_pricing() -> Dict[str, Tuple[float, float, float]]:
         return {}
 
     try:
-        url = "https://openrouter.ai/api/v1/models"
-        resp = requests.get(url, timeout=15)
+        api_key = os.environ.get("EDGEE_API_KEY", "").strip() or os.environ.get("OPENROUTER_API_KEY", "").strip()
+        if not api_key:
+            return {}
+        url = "https://api.edgee.ai/v1/models"
+        resp = requests.get(
+            url,
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=15,
+        )
         resp.raise_for_status()
 
-        data = resp.json()
-        models = data.get("data", [])
+        models = resp.json().get("data", [])
 
         # Prefixes we care about
         prefixes = ("anthropic/", "openai/", "google/", "meta-llama/", "x-ai/", "qwen/")
@@ -69,87 +71,53 @@ def fetch_openrouter_pricing() -> Dict[str, Tuple[float, float, float]]:
             if not model_id.startswith(prefixes):
                 continue
 
-            pricing = model.get("pricing", {})
-            if not pricing or not pricing.get("prompt"):
+            pricing = model.get("pricing") or {}
+            if not pricing:
                 continue
 
-            # OpenRouter pricing is in dollars per token (raw values)
-            raw_prompt = float(pricing.get("prompt", 0))
-            raw_completion = float(pricing.get("completion", 0))
-            raw_cached_str = pricing.get("input_cache_read")
-            raw_cached = float(raw_cached_str) if raw_cached_str else None
+            raw_prompt = pricing.get("prompt") or pricing.get("input") or pricing.get("input_price")
+            raw_completion = pricing.get("completion") or pricing.get("output") or pricing.get("output_price")
+            if raw_prompt is None or raw_completion is None:
+                continue
 
-            # Convert to per-million tokens
-            prompt_price = round(raw_prompt * 1_000_000, 4)
-            completion_price = round(raw_completion * 1_000_000, 4)
+            prompt_price = round(float(raw_prompt) * 1_000_000, 4)
+            completion_price = round(float(raw_completion) * 1_000_000, 4)
+            raw_cached = pricing.get("input_cache_read")
             if raw_cached is not None:
-                cached_price = round(raw_cached * 1_000_000, 4)
+                cached_price = round(float(raw_cached) * 1_000_000, 4)
             else:
-                cached_price = round(prompt_price * 0.1, 4)  # fallback: 10% of prompt
-
-            # Sanity check: skip obviously wrong prices
-            if prompt_price > 1000 or completion_price > 1000:
-                log.warning(f"Skipping {model_id}: prices seem wrong (prompt={prompt_price}, completion={completion_price})")
-                continue
+                cached_price = round(prompt_price * 0.1, 4)
 
             pricing_dict[model_id] = (prompt_price, cached_price, completion_price)
 
-        log.info(f"Fetched pricing for {len(pricing_dict)} models from OpenRouter")
+        log.info("Fetched pricing for %d models from Edgee", len(pricing_dict))
         return pricing_dict
 
-    except (requests.RequestException, ValueError, KeyError) as e:
-        log.warning(f"Failed to fetch OpenRouter pricing: {e}")
+    except (requests.RequestException, ValueError, KeyError, TypeError) as e:
+        log.warning("Failed to fetch Edgee pricing: %s", e)
         return {}
 
 
 class LLMClient:
-    """OpenRouter API wrapper. All LLM calls go through this class."""
+    """Edgee API wrapper. All LLM calls go through this class."""
 
     def __init__(
         self,
         api_key: Optional[str] = None,
-        base_url: str = "https://openrouter.ai/api/v1",
     ):
-        self._api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
-        self._base_url = base_url
+        self._api_key = (
+            api_key
+            or os.environ.get("EDGEE_API_KEY", "")
+            or os.environ.get("OPENROUTER_API_KEY", "")
+        )
         self._client = None
 
     def _get_client(self):
         if self._client is None:
-            from openai import OpenAI
-            self._client = OpenAI(
-                base_url=self._base_url,
-                api_key=self._api_key,
-                default_headers={
-                    "HTTP-Referer": "https://colab.research.google.com/",
-                    "X-Title": "Ouroboros",
-                },
-            )
-        return self._client
+            from edgee import Edgee
 
-    def _fetch_generation_cost(self, generation_id: str) -> Optional[float]:
-        """Fetch cost from OpenRouter Generation API as fallback."""
-        try:
-            import requests
-            url = f"{self._base_url.rstrip('/')}/generation?id={generation_id}"
-            resp = requests.get(url, headers={"Authorization": f"Bearer {self._api_key}"}, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json().get("data") or {}
-                cost = data.get("total_cost") or data.get("usage", {}).get("cost")
-                if cost is not None:
-                    return float(cost)
-            # Generation might not be ready yet — retry once after short delay
-            time.sleep(0.5)
-            resp = requests.get(url, headers={"Authorization": f"Bearer {self._api_key}"}, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json().get("data") or {}
-                cost = data.get("total_cost") or data.get("usage", {}).get("cost")
-                if cost is not None:
-                    return float(cost)
-        except Exception:
-            log.debug("Failed to fetch generation cost from OpenRouter", exc_info=True)
-            pass
-        return None
+            self._client = Edgee(self._api_key)
+        return self._client
 
     def chat(
         self,
@@ -162,42 +130,26 @@ class LLMClient:
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Single LLM call. Returns: (response_message_dict, usage_dict with cost)."""
         client = self._get_client()
-        effort = normalize_reasoning_effort(reasoning_effort)
 
-        extra_body: Dict[str, Any] = {
-            "reasoning": {"effort": effort, "exclude": True},
-        }
-
-        # Pin Anthropic models to Anthropic provider for prompt caching
-        if model.startswith("anthropic/"):
-            extra_body["provider"] = {
-                "order": ["Anthropic"],
-                "allow_fallbacks": False,
-                "require_parameters": True,
-            }
-
-        kwargs: Dict[str, Any] = {
-            "model": model,
+        request_input: Dict[str, Any] = {
             "messages": messages,
             "max_tokens": max_tokens,
-            "extra_body": extra_body,
         }
         if tools:
-            # Add cache_control to last tool for Anthropic prompt caching
-            # This caches all tool schemas (they never change between calls)
-            tools_with_cache = [t for t in tools]  # shallow copy
-            if tools_with_cache:
-                last_tool = {**tools_with_cache[-1]}  # copy last tool
-                last_tool["cache_control"] = {"type": "ephemeral", "ttl": "1h"}
-                tools_with_cache[-1] = last_tool
-            kwargs["tools"] = tools_with_cache
-            kwargs["tool_choice"] = tool_choice
+            request_input["tools"] = tools
+            request_input["tool_choice"] = tool_choice
 
-        resp = client.chat.completions.create(**kwargs)
-        resp_dict = resp.model_dump()
-        usage = resp_dict.get("usage") or {}
-        choices = resp_dict.get("choices") or [{}]
-        msg = (choices[0] if choices else {}).get("message") or {}
+        resp = client.send(model=model, input=request_input)
+        msg = resp.message or {"role": "assistant", "content": resp.text or ""}
+        usage: Dict[str, Any] = {}
+        if resp.usage is not None:
+            usage = {
+                "prompt_tokens": int(getattr(resp.usage, "prompt_tokens", 0) or 0),
+                "completion_tokens": int(getattr(resp.usage, "completion_tokens", 0) or 0),
+                "total_tokens": int(getattr(resp.usage, "total_tokens", 0) or 0),
+            }
+        # Edgee SDK does not expose per-request cost directly in send() response.
+        # Cost is estimated upstream when usage["cost"] is missing.
 
         # Extract cached_tokens from prompt_tokens_details if available
         if not usage.get("cached_tokens"):
@@ -216,14 +168,6 @@ class LLMClient:
                               or prompt_details_for_write.get("cache_creation_input_tokens"))
                 if cache_write:
                     usage["cache_write_tokens"] = int(cache_write)
-
-        # Ensure cost is present in usage (OpenRouter includes it, but fallback if missing)
-        if not usage.get("cost"):
-            gen_id = resp_dict.get("id") or ""
-            if gen_id:
-                cost = self._fetch_generation_cost(gen_id)
-                if cost is not None:
-                    usage["cost"] = cost
 
         return msg, usage
 
@@ -280,11 +224,11 @@ class LLMClient:
 
     def default_model(self) -> str:
         """Return the single default model from env. LLM switches via tool if needed."""
-        return os.environ.get("OUROBOROS_MODEL", "anthropic/claude-sonnet-4.6")
+        return os.environ.get("OUROBOROS_MODEL", "gpt-5.2")
 
     def available_models(self) -> List[str]:
         """Return list of available models from env (for switch_model tool schema)."""
-        main = os.environ.get("OUROBOROS_MODEL", "anthropic/claude-sonnet-4.6")
+        main = os.environ.get("OUROBOROS_MODEL", "gpt-5.2")
         code = os.environ.get("OUROBOROS_MODEL_CODE", "")
         light = os.environ.get("OUROBOROS_MODEL_LIGHT", "")
         models = [main]
@@ -293,3 +237,8 @@ class LLMClient:
         if light and light != main and light != code:
             models.append(light)
         return models
+
+
+# Backward compatibility for existing imports.
+def fetch_openrouter_pricing() -> Dict[str, Tuple[float, float, float]]:
+    return fetch_edgee_pricing()

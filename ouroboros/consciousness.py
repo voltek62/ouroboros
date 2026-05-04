@@ -228,7 +228,7 @@ class BackgroundConsciousness:
                 if self._event_queue is not None:
                     self._event_queue.put({
                         "type": "llm_usage",
-                        "provider": "openrouter",
+                        "provider": "edgee",
                         "usage": usage,
                         "source": "consciousness",
                         "ts": utc_now_iso(),

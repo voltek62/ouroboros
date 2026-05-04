@@ -25,7 +25,7 @@ from ouroboros.utils import utc_now_iso, append_jsonl, truncate_for_log, sanitiz
 
 log = logging.getLogger(__name__)
 
-# Pricing from OpenRouter API (2026-02-17). Update periodically via /api/v1/models.
+# Pricing table used for cost fallback estimation.
 _MODEL_PRICING_STATIC = {
     "anthropic/claude-opus-4.6": (5.0, 0.5, 25.0),
     "anthropic/claude-opus-4": (15.0, 1.5, 75.0),
@@ -38,6 +38,12 @@ _MODEL_PRICING_STATIC = {
     "openai/gpt-4.1": (2.0, 0.50, 8.0),
     "openai/gpt-5.2": (1.75, 0.175, 14.0),
     "openai/gpt-5.2-codex": (1.75, 0.175, 14.0),
+    "gpt-5.2": (1.75, 0.175, 14.0),
+    "gpt-5.2-codex": (1.75, 0.175, 14.0),
+    "claude-sonnet-4.5": (3.0, 0.30, 15.0),
+    "claude-sonnet-4.6": (3.0, 0.30, 15.0),
+    "gemini-2.5-pro": (1.25, 0.125, 10.0),
+    "gemini-3-pro": (2.0, 0.20, 12.0),
     "google/gemini-2.5-pro-preview": (1.25, 0.125, 10.0),
     "google/gemini-3-pro-preview": (2.0, 0.20, 12.0),
     "x-ai/grok-3-mini": (0.30, 0.03, 0.50),
@@ -50,7 +56,7 @@ _pricing_lock = threading.Lock()
 
 def _get_pricing() -> Dict[str, Tuple[float, float, float]]:
     """
-    Lazy-load pricing. On first call, attempts to fetch from OpenRouter API.
+    Lazy-load pricing. On first call, attempts to fetch live provider pricing.
     Falls back to static pricing if fetch fails.
     Thread-safe via module-level lock.
     """
@@ -76,7 +82,7 @@ def _get_pricing() -> Dict[str, Tuple[float, float, float]]:
                 _cached_pricing.update(_live)
         except Exception as e:
             import logging as _log
-            _log.getLogger(__name__).warning("Failed to sync pricing from OpenRouter: %s", e)
+            _log.getLogger(__name__).warning("Failed to sync live pricing: %s", e)
             # Reset flag so we retry next time
             _pricing_fetched = False
 
@@ -701,7 +707,7 @@ def run_llm_loop(
                 # Configurable fallback priority list (Bible P3: no hardcoded behavior)
                 fallback_list_raw = os.environ.get(
                     "OUROBOROS_MODEL_FALLBACK_LIST",
-                    "google/gemini-2.5-pro-preview,openai/o3,anthropic/claude-sonnet-4.6"
+                    "gpt-5.2,claude-sonnet-4.5,gemini-2.5-pro"
                 )
                 fallback_candidates = [m.strip() for m in fallback_list_raw.split(",") if m.strip()]
                 fallback_model = None
