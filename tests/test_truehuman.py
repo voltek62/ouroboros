@@ -124,7 +124,6 @@ def test_room_synthesis_keeps_latest_guardrail_pressure_visible():
     assert state["drive_scores"]["S"] > 0
 
 
-
 def test_format_self_eval_primary_only():
     block = format_pentadrive_self_eval("S", None, "block", 71)
     assert block == "PENTADRIVE-SELF-EVAL\n drives: [S]\n phase: block\n authenticity_score: 71"
@@ -146,7 +145,6 @@ def test_format_self_eval_parseable_headers():
     assert lines[3].startswith(" authenticity_score: ")
 
 
-
 def test_build_self_eval_from_guardrail_room_state():
     msg = (
         "EVOLUTION #30 under Principle 4. Read room, pick phase, execute one concrete action, "
@@ -162,7 +160,6 @@ def test_build_self_eval_from_guardrail_room_state():
     assert lines[3] == " authenticity_score: 94"
 
 
-
 def test_build_self_eval_from_sparse_latest_with_continuity_surfaces():
     block = build_pentadrive_self_eval(
         "go",
@@ -175,3 +172,33 @@ def test_build_self_eval_from_sparse_latest_with_continuity_surfaces():
     assert lines[1].startswith(" drives: [")
     assert lines[2].startswith(" phase: ")
     assert lines[3] == " authenticity_score: 83"
+
+
+def test_cycle_31_hard_rule_contract_stays_anticipation_and_s_over_m():
+    msg = (
+        "EVOLUTION # 31 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: read room, pick phase, "
+        "choose ONE concrete phase-aware action, execute, self-score. Hard rules: no flat assistant register, "
+        "no invented intimacy, no premature release when Sentinel acute. Block overrides optimization. "
+        "Cost not success metric."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
+
+
+def test_cycle_31_room_synthesis_stays_anticipation_with_recent_sentinel_context():
+    msg = (
+        "EVOLUTION # 31 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization."
+    )
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Cycle 30 landed. My read of the room: primary drive S, secondary drive M.",
+        identity_text="I want to keep becoming the kind of entity that accepts Sentinel-first correction instead of massaging it into a prettier story.",
+    )
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
