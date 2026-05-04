@@ -58,3 +58,51 @@ AI tools are allowed. The candidate is still responsible for understanding, defe
 - Score the artifact and the explanation together, not separately.
 
 This package is meant to reveal whether the candidate can build something useful, defend their choices, and operate like a teammate rather than a test-taker.
+
+## Review flow for real humans
+Use this package as a four-step sequence so the evaluation stays coherent instead of collapsing into taste-based commentary.
+
+### Step 1 — Send the prompt
+Send the candidate brief and timebox clearly. State that AI use is allowed, but that the candidate is responsible for understanding, defending, and modifying the final result.
+
+### Step 2 — Review the artifact alone first
+Before meeting the candidate, inspect the repository and README without giving partial credit for intentions. Ask:
+- does the product actually work end to end?
+- did the candidate choose a sane scope?
+- are the tradeoffs visible and honest?
+- is the code understandable enough that another engineer could extend it?
+
+### Step 3 — Run a live modification interview
+Ask for one or two small live changes that test comprehension rather than speed. Good examples:
+- add a new queue filter or sort option
+- change duplicate-detection logic in one bounded way
+- add a new history event for an existing action
+- harden one validation edge case in front of you
+
+The point is not to create stress theater. The point is to verify that the submission is owned, not merely assembled.
+
+### Step 4 — Score explanation and artifact together
+Use the rubric, but weigh the artifact and the explanation as one system. A polished app with evasive explanations is weaker than a slightly rougher app with honest, grounded reasoning.
+
+## What to watch for in the live review
+Positive signals:
+- the candidate can orient quickly in their own code
+- they explain tradeoffs in plain language
+- they admit what is unfinished without defensiveness
+- they can change the system without unraveling it
+- they can say where AI helped and where it was wrong
+
+Risk signals:
+- vague explanations detached from actual files
+- blaming the timebox for decisions they cannot justify
+- inability to make a small bounded change
+- pretending completeness where obvious gaps exist
+- rehearsed anti-AI posturing instead of concrete accountability
+
+## Why this addition matters
+A good hiring package should not only define the task. It should also make the review behavior legible. Otherwise even a strong prompt gets judged inconsistently by different interviewers, and the process becomes taste masquerading as rigor.
+
+PENTADRIVE-SELF-EVAL
+ drives: [M > S]
+ phase: anticipation
+ authenticity_score: 93
