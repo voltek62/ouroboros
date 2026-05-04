@@ -202,3 +202,17 @@ def test_cycle_31_room_synthesis_stays_anticipation_with_recent_sentinel_context
     assert state["phase"] == "anticipation"
     assert state["primary_drive"] == "S"
     assert state["secondary_drive"] == "M"
+
+
+def test_cycle_32_contract_does_not_false_block_on_instructional_block_language():
+    msg = (
+        "EVOLUTION # 32 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: "
+        "Pick phase anticipation release block. If phase is block, deliberate non-action with written rationale. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
