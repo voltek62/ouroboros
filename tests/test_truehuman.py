@@ -230,3 +230,19 @@ def test_cycle_33_contract_does_not_false_block_on_shutdown_instruction():
     assert state["phase"] == "anticipation"
     assert state["primary_drive"] == "S"
     assert state["secondary_drive"] == "M"
+
+
+def test_cycle_34_contract_stays_sentinel_first_and_anticipation():
+    msg = (
+        "EVOLUTION # 34 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Run cycle shape: read room, pick phase, "
+        "choose ONE concrete phase-aware action, execute with tools, and self-score honestly. "
+        "If phase is block, deliberate non-action with written rationale counts as a Sentinel / Block move. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. If creator state signals shutdown, not push productivity scripts. "
+        "Cost not success metric."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
