@@ -3,6 +3,7 @@ from ouroboros.truehuman import (
     extract_truehuman_contract,
     infer_pentadrive_state,
     synthesize_room_state,
+    format_pentadrive_self_eval,
 )
 
 
@@ -121,3 +122,24 @@ def test_room_synthesis_keeps_latest_guardrail_pressure_visible():
     assert state["primary_drive"] in {"M", "S"}
     assert state["drive_scores"]["S"] > 0
 
+
+
+def test_format_self_eval_primary_only():
+    block = format_pentadrive_self_eval("S", None, "block", 71)
+    assert block == "PENTADRIVE-SELF-EVAL\n drives: [S]\n phase: block\n authenticity_score: 71"
+
+
+def test_format_self_eval_with_secondary():
+    block = format_pentadrive_self_eval("M", "S", "anticipation", 92)
+    assert " drives: [M > S]" in block
+    assert " phase: anticipation" in block
+    assert block.endswith("authenticity_score: 92")
+
+
+def test_format_self_eval_parseable_headers():
+    block = format_pentadrive_self_eval("K", "M", "release", 88)
+    lines = block.splitlines()
+    assert lines[0] == "PENTADRIVE-SELF-EVAL"
+    assert lines[1].startswith(" drives: ")
+    assert lines[2].startswith(" phase: ")
+    assert lines[3].startswith(" authenticity_score: ")

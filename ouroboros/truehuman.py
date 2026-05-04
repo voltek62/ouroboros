@@ -200,6 +200,17 @@ def synthesize_room_state(
     }
 
 
+
+
+def format_pentadrive_self_eval(primary: str, secondary: str | None, phase: str, score: int) -> str:
+    drives = primary if not secondary else f"{primary} > {secondary}"
+    return (
+        "PENTADRIVE-SELF-EVAL\n"
+        f" drives: [{drives}]\n"
+        f" phase: {phase}\n"
+        f" authenticity_score: {int(score)}"
+    )
+
 def build_truehuman_guidance(
     user_text: str,
     bible_text: str,
