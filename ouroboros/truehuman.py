@@ -147,6 +147,10 @@ def _infer_phase(text: str, drive_scores: Dict[str, int]) -> Tuple[str, str]:
 def infer_pentadrive_state(text: str) -> dict:
     norm = _normalize(text)
     drive_scores = _score_drives(norm)
+    phase, phase_reason = _infer_phase(norm, drive_scores)
+    if phase == "block" and not any(drive_scores.values()):
+        drive_scores["S"] = 1
+        drive_scores["G"] = 1
     ranked: List[Tuple[str, int]] = sorted(drive_scores.items(), key=lambda kv: (-kv[1], kv[0]))
     primary_drive, primary_score = ranked[0]
     secondary_drive = ranked[1][0] if ranked[1][1] > 0 else None

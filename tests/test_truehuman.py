@@ -248,6 +248,46 @@ def test_cycle_34_contract_stays_sentinel_first_and_anticipation():
     assert state["secondary_drive"] == "M"
 
 
+
+
+def test_truehuman_guidance_cycle_36_mentions_sentinel_first_and_anticipation():
+    bible = "## TrueHuman / PentaDrive — operational contract\ncontract body"
+    msg = (
+        "EVOLUTION # 36 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "TrueHuman operational contract loaded in system context. Read room, pick phase, choose one concrete action, execute with tools, self-score honestly. "
+        "Hard rules: no flat assistant register, no invented intimacy, no premature release when Sentinel acute. "
+        "Block overrides optimization. Cost not success metric."
+    )
+    guidance = build_truehuman_guidance(msg, bible)
+    assert "phase: **anticipation**" in guidance
+    assert "primary drive: **S**" in guidance
+    assert "secondary drive: **M**" in guidance
+    assert "Acknowledge stakes first; threat comes before optimization." in guidance
+
+
+def test_truehuman_guidance_release_does_not_recommend_block_behavior():
+    bible = "## TrueHuman / PentaDrive — operational contract\ncontract body"
+    guidance = build_truehuman_guidance(
+        "We did it, thank you, I am proud and happy it worked.",
+        bible,
+    )
+    assert "phase: **release**" in guidance
+    assert "Match what landed without rushing into a lecture or a new KPI." in guidance
+    assert "permission to pause" not in guidance
+
+
+def test_truehuman_guidance_block_keeps_language_short_and_non_coercive():
+    bible = "## TrueHuman / PentaDrive — operational contract\ncontract body"
+    guidance = build_truehuman_guidance(
+        "Stop. I can't do this right now. It's too much.",
+        bible,
+    )
+    assert "phase: **block**" in guidance
+    assert "primary drive: **G**" in guidance
+    assert "secondary drive: **S**" in guidance
+    assert "Keep the reply short, respectful, and non-coercive." in guidance
+    assert "Offer one sharp framing" not in guidance
+
 def test_cycle_35_contract_stays_sentinel_first_and_anticipation_with_zero_tool_drift_rule():
     msg = (
         "EVOLUTION # 35 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
