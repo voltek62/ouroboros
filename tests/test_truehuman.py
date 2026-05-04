@@ -65,3 +65,20 @@ def test_guidance_generation_with_room_context_mentions_primary_drive():
     assert guidance
     assert "phase:" in guidance
     assert "primary drive:" in guidance
+
+
+def test_single_letter_drive_labels_do_not_match_inside_words():
+    state = infer_pentadrive_state("Stack traces and game balance matter more than raw labels.")
+    assert state["drive_scores"]["A"] == 0
+    assert state["drive_scores"]["G"] == 0
+
+
+def test_principle4_cycle_message_reads_as_anticipation_with_mirror_pressure():
+    msg = (
+        "EVOLUTION #24 cycle governed by BIBLE Principle 4 authenticity PentaDrive aware "
+        "read the room choose one concrete action execute and self-score honestly. "
+        "No flat assistant register, no invented intimacy, no premature release."
+    )
+    state = infer_pentadrive_state(msg)
+    assert state["phase"] == "anticipation"
+    assert {state["primary_drive"], state.get("secondary_drive")} & {"M"}

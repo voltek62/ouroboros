@@ -11,7 +11,8 @@ It is a small runtime scaffold so Principle 4 becomes more explicit in context.
 
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
+import re
+from typing import Dict, List, Set, Tuple
 
 DRIVE_CUES = {
     "S": {
@@ -32,7 +33,8 @@ DRIVE_CUES = {
     "M": {
         "respect", "dignity", "status", "role", "reputation", "image", "judge", "judged",
         "prove", "proud", "ashamed", "embarrassed", "humiliated", "serious", "real human",
-        "hire", "hired", "employee", "worth", "standards", "credibility",
+        "hire", "hired", "employee", "worth", "standards", "credibility", "authenticity",
+        "authentic", "assistant register", "principle 4", "self-score",
     },
     "G": {
         "pain", "hurt", "ache", "comfort", "relief", "soothe", "tired", "burnout", "rest",
@@ -66,12 +68,26 @@ def _normalize(text: str) -> str:
     return " ".join((text or "").lower().split())
 
 
+def _tokenize(text: str) -> Set[str]:
+    return set(re.findall(r"[\wÀ-ÿ']+", _normalize(text)))
+
+
+def _contains_cue(norm: str, tokens: Set[str], cue: str) -> bool:
+    cue = _normalize(cue)
+    if not cue:
+        return False
+    if " " in cue or "'" in cue:
+        return cue in norm
+    return cue in tokens
+
+
 def _score_drives(text: str) -> Dict[str, int]:
     norm = _normalize(text)
+    tokens = _tokenize(text)
     scores = {k: 0 for k in DRIVE_CUES}
     for drive, cues in DRIVE_CUES.items():
         for cue in cues:
-            if cue in norm:
+            if _contains_cue(norm, tokens, cue):
                 scores[drive] += 1
     # Small priors from punctuation / imperative intensity
     if "!" in text:
@@ -83,13 +99,14 @@ def _score_drives(text: str) -> Dict[str, int]:
 
 def _infer_phase(text: str, drive_scores: Dict[str, int]) -> Tuple[str, str]:
     norm = _normalize(text)
-    if any(cue in norm for cue in BLOCK_CUES):
+    tokens = _tokenize(text)
+    if any(_contains_cue(norm, tokens, cue) for cue in BLOCK_CUES):
         return "block", "Shutdown or refusal cues detected."
-    release_hits = sum(1 for cue in RELEASE_CUES if cue in norm)
-    anticipation_hits = sum(1 for cue in ANTICIPATION_CUES if cue in norm)
+    release_hits = sum(1 for cue in RELEASE_CUES if _contains_cue(norm, tokens, cue))
+    anticipation_hits = sum(1 for cue in ANTICIPATION_CUES if _contains_cue(norm, tokens, cue))
     if release_hits > anticipation_hits and release_hits >= 1:
         return "release", "Resolution/gratitude/success language is present."
-    if drive_scores.get("S", 0) >= 2 and any(tok in norm for tok in ("what if", "worry", "afraid", "risk", "unsafe", "?")):
+    if drive_scores.get("S", 0) >= 2 and any(_contains_cue(norm, tokens, tok) for tok in ("what if", "worry", "afraid", "risk", "unsafe")):
         return "anticipation", "Threat cues remain unresolved."
     return "anticipation", "Defaulting to unresolved / pre-resolution stance."
 

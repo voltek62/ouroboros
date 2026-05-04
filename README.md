@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.5 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.6 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -225,6 +225,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.6 -- TrueHuman Cue Precision
+- Replaced naive substring drive matching with token-aware cue detection so single-letter labels stop leaking into unrelated words.
+- Added Principle-4-specific Mirror cues and regression tests for cycle-language pressure.
+- Preserved the lightweight TrueHuman scaffold while making room-reading less brittle and less flattering to itself.
 
 ### v6.2.5 -- Room-Aware TrueHuman Context
 - Strengthened Principle 4 guidance so TrueHuman synthesis uses the latest creator message as primary signal, with recent chat and identity as continuity surfaces.
