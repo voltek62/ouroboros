@@ -19,6 +19,7 @@ from ouroboros.utils import (
 )
 from ouroboros.memory import Memory
 from ouroboros.truehuman import build_truehuman_guidance
+from ouroboros.molt import MOLT
 
 log = logging.getLogger(__name__)
 
@@ -364,6 +365,24 @@ def build_llm_messages(
     )
     if truehuman_guidance:
         dynamic_parts.append("## TrueHuman Guidance\n\n" + truehuman_guidance)
+
+    molt = MOLT(memory.drive_root)
+    molt_snapshot = molt.load_snapshot()
+    if not molt_snapshot:
+        molt.append_mutation(
+            kind="context",
+            summary="Initialized MOLT snapshot for prompt context.",
+            artifacts=["ouroboros/context.py", "ouroboros/molt.py"],
+            source_task_id=str(task.get("id") or ""),
+        )
+        molt_snapshot = molt.build_snapshot(
+            identity_text=memory.load_identity(),
+            scratchpad_text=memory.load_scratchpad(),
+        )
+        molt.save_snapshot(molt_snapshot)
+    molt_block = molt.render_context_block(molt_snapshot)
+    if molt_block:
+        dynamic_parts.append("## MOLT\n\n" + molt_block)
 
     dynamic_parts.extend(_build_recent_sections(memory, env, task_id=task.get("id", "")))
 

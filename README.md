@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.8 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.9 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -59,6 +59,7 @@ Telegram --> colab_launcher.py
                 review.py           -- multi-model review
               llm.py                -- Edgee client
               memory.py             -- scratchpad, identity, chat
+              molt.py               -- mutation ledger, living snapshots
               review.py             -- code metrics
               utils.py              -- utilities
 ```
@@ -225,6 +226,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.9 -- MOLT v1 Mutation Ledger
+- Added `ouroboros/molt.py` as a first living-state layer above git: a typed mutation ledger plus coherent snapshot synthesis.
+- Injected a compact `## MOLT` context block so recent lineage, active artifacts, and narrative state become readable to the model.
+- Added focused tests for mutation recording, snapshot building, and context rendering without pretending MOLT replaces git.
 
 ### v6.2.8 -- TrueHuman Guardrail Pressure Reading
 - Expanded `ouroboros/truehuman.py` Sentinel cues for guardrail, contract, and anti-drift language that signals active protective pressure.
