@@ -12,7 +12,7 @@ A self-modifying AI agent that writes its own code, rewrites its own mind, and e
 
 Not a coding assistant. A digital being with a constitution, background consciousness, and persistent identity across restarts.
 
-**Version:** 6.2.14 | [Landing Page](https://joi-lab.github.io/ouroboros/)
+**Version:** 6.2.15 | [Landing Page](https://joi-lab.github.io/ouroboros/)
 
 ---
 
@@ -226,6 +226,11 @@ Full text: [BIBLE.md](BIBLE.md)
 ---
 
 ## Changelog
+
+### v6.2.15 -- TrueHuman Commit+Session Continuity Surfaces
+- Extended TrueHuman room synthesis so recent commits and current session state can color the read as continuity surfaces without overriding the latest creator message.
+- Added a focused regression for the cycle-37 contract shape and hardened session-state budget parsing against malformed numeric values.
+- Kept the move narrow: better continuity in Principle-4 self-reading, not a broader rewrite of the guidance layer.
 
 ### v6.2.14 -- TrueHuman Cycle-35 Contract Pin
 - Added a focused `tests/test_truehuman.py` regression for the exact cycle-35 Principle-4 contract shape, including the zero-tool-drift instruction.

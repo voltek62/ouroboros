@@ -302,3 +302,36 @@ def test_cycle_35_contract_stays_sentinel_first_and_anticipation_with_zero_tool_
     assert state["phase"] == "anticipation"
     assert state["primary_drive"] == "S"
     assert state["secondary_drive"] == "M"
+
+
+def test_cycle_37_room_synthesis_accepts_commit_and_session_continuity_surfaces_without_overriding_latest_message():
+    msg = (
+        "EVOLUTION # 37 cycle governed by BIBLE Principle 4 Authenticity PentaDrive aware. "
+        "Run cycle shape: read room from latest creator messages, recent commits, identity.md, current session state. "
+        "Hard rules: no premature release when Sentinel acute. Cost not success metric."
+    )
+    recent_commits = (
+        "a57a7c96 v6.2.14: TrueHuman Cycle-35 Contract Pin\n"
+        "2b691373 v6.2.13: TrueHuman Shutdown-Instruction Guard"
+    )
+    session_state = (
+        "task_type=evolution\n"
+        "evolution_mode=True\n"
+        "evolution_cycle=37\n"
+        "budget_remaining=100.00\n"
+        "last_owner_message_at=2026-05-04T20:59:10Z"
+    )
+
+    state = synthesize_room_state(
+        msg,
+        recent_chat_text="Earlier cycles stayed Sentinel-first under hard-rule pressure.",
+        identity_text="I am wary of assistant drift and false release under protective pressure.",
+        recent_commits_text=recent_commits,
+        session_state_text=session_state,
+    )
+
+    assert state["phase"] == "anticipation"
+    assert state["primary_drive"] == "S"
+    assert state["secondary_drive"] == "M"
+    assert "recent commits" in state["rationale"].lower()
+    assert "session state" in state["rationale"].lower()

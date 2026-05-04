@@ -281,6 +281,54 @@ def _build_health_invariants(env: Any) -> str:
     return "## Health Invariants\n\n" + "\n".join(f"- {c}" for c in checks)
 
 
+
+def _safe_run_git_log(repo_dir: pathlib.Path, max_entries: int = 5, max_chars: int = 2500) -> str:
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            [
+                "git",
+                "log",
+                f"--max-count={max_entries}",
+                "--pretty=format:%h %s",
+            ],
+            cwd=str(repo_dir),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        output = (result.stdout or "").strip()
+        return clip_text(output, max_chars) if output else ""
+    except Exception:
+        log.debug("Failed to collect git log for TrueHuman context", exc_info=True)
+        return ""
+
+
+def _build_truehuman_session_state(env: Any, task: Dict[str, Any]) -> str:
+    try:
+        state_json = _safe_read(env.drive_path("state/state.json"), fallback="{}")
+        state = json.loads(state_json)
+    except Exception:
+        state = {}
+
+    try:
+        total_budget = float(os.environ.get("TOTAL_BUDGET", "1") or "1")
+        spent_usd = float(state.get("spent_usd", 0) or 0)
+        budget_remaining = f"{max(total_budget - spent_usd, 0):.2f}"
+    except (TypeError, ValueError):
+        budget_remaining = "unknown"
+
+    bits = [
+        f"task_type={task.get('type', '')}",
+        f"task_id={task.get('id', '')}",
+        f"evolution_mode={state.get('evolution_mode_enabled')}",
+        f"evolution_cycle={state.get('evolution_cycle')}",
+        f"budget_remaining={budget_remaining}",
+        f"last_owner_message_at={state.get('last_owner_message_at', '')}",
+    ]
+    return "\n".join(str(bit) for bit in bits if bit is not None)
+
 def build_llm_messages(
     env: Any,
     memory: Memory,
@@ -357,11 +405,15 @@ def build_llm_messages(
 
     identity_excerpt = clip_text(memory.load_identity(), 4000)
     recent_chat_excerpt = memory.summarize_chat(memory.read_jsonl_tail("chat.jsonl", 12))
+    recent_commit_excerpt = _safe_run_git_log(env.repo_dir, max_entries=5, max_chars=2500)
+    session_state_excerpt = _build_truehuman_session_state(env, task)
     truehuman_guidance = build_truehuman_guidance(
         str(task.get("text", "") or ""),
         bible_md,
         recent_chat_text=recent_chat_excerpt,
         identity_text=identity_excerpt,
+        recent_commits_text=recent_commit_excerpt,
+        session_state_text=session_state_excerpt,
     )
     if truehuman_guidance:
         dynamic_parts.append("## TrueHuman Guidance\n\n" + truehuman_guidance)

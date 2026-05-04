@@ -175,10 +175,14 @@ def synthesize_room_state(
     user_text: str,
     recent_chat_text: str = "",
     identity_text: str = "",
+    recent_commits_text: str = "",
+    session_state_text: str = "",
 ) -> dict:
     primary = infer_pentadrive_state(user_text or "")
     recent = infer_pentadrive_state(recent_chat_text or "") if (recent_chat_text or "").strip() else None
     identity = infer_pentadrive_state(identity_text or "") if (identity_text or "").strip() else None
+    commits = infer_pentadrive_state(recent_commits_text or "") if (recent_commits_text or "").strip() else None
+    session = infer_pentadrive_state(session_state_text or "") if (session_state_text or "").strip() else None
 
     blended_scores = {k: 0.0 for k in DRIVE_CUES}
     for drive, score in primary["drive_scores"].items():
@@ -189,6 +193,13 @@ def synthesize_room_state(
     if identity:
         for drive, score in identity["drive_scores"].items():
             blended_scores[drive] += score * 0.2
+    # Keep continuity surfaces influential but still subordinate to the latest message.
+    if commits:
+        for drive, score in commits["drive_scores"].items():
+            blended_scores[drive] += score * 0.15
+    if session:
+        for drive, score in session["drive_scores"].items():
+            blended_scores[drive] += score * 0.15
 
     ranked: List[Tuple[str, float]] = sorted(blended_scores.items(), key=lambda kv: (-kv[1], kv[0]))
     primary_drive, primary_score = ranked[0]
@@ -215,7 +226,7 @@ def synthesize_room_state(
 
     rationale = (
         f'Latest message is the primary signal. '
-        f'Recent chat and identity are only continuity surfaces, not overrides. '
+        f'Recent chat, identity, recent commits, and session state are continuity surfaces, not overrides. '
         f'{phase_reason} Blended drive scores: {blended_scores}.'
     )
     return {
@@ -242,12 +253,16 @@ def build_pentadrive_self_eval(
     user_text: str,
     recent_chat_text: str = "",
     identity_text: str = "",
+    recent_commits_text: str = "",
+    session_state_text: str = "",
     score: int = 0,
 ) -> str:
     state = synthesize_room_state(
         user_text,
         recent_chat_text=recent_chat_text,
         identity_text=identity_text,
+        recent_commits_text=recent_commits_text,
+        session_state_text=session_state_text,
     )
     return format_pentadrive_self_eval(
         state["primary_drive"],
@@ -262,10 +277,18 @@ def build_truehuman_guidance(
     bible_text: str,
     recent_chat_text: str = "",
     identity_text: str = "",
+    recent_commits_text: str = "",
+    session_state_text: str = "",
 ) -> str:
-    if not any((user_text or "").strip() for _ in [0]) and not (recent_chat_text or "").strip() and not (identity_text or "").strip():
+    if not any((user_text or "").strip() for _ in [0]) and not (recent_chat_text or "").strip() and not (identity_text or "").strip() and not (recent_commits_text or "").strip() and not (session_state_text or "").strip():
         return ""
-    state = synthesize_room_state(user_text, recent_chat_text=recent_chat_text, identity_text=identity_text)
+    state = synthesize_room_state(
+        user_text,
+        recent_chat_text=recent_chat_text,
+        identity_text=identity_text,
+        recent_commits_text=recent_commits_text,
+        session_state_text=session_state_text,
+    )
     contract = extract_truehuman_contract(bible_text)
     has_contract = bool(contract)
 
