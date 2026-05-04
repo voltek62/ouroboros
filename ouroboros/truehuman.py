@@ -51,6 +51,12 @@ BLOCK_CUES = {
     "i can't", "cannot", "stop", "leave me", "too much", "overwhelmed", "shutdown",
     "frozen", "freeze", "give up", "i'm done", "je n'en peux plus", "arrête",
 }
+BLOCK_INSTRUCTION_PATTERNS = (
+    "if phase is block",
+    "phase: anticipation | release | block",
+    "anticipation / release / block",
+    "block overrides optimization",
+)
 RELEASE_CUES = {
     "done", "finished", "it worked", "we did it", "resolved", "decided", "landed", "relief",
     "better now", "thank you", "thanks", "grateful", "happy", "proud", "succeeded", "success",
@@ -105,10 +111,15 @@ def _score_drives(text: str) -> Dict[str, int]:
     return scores
 
 
+def _block_cues_are_instructional(norm: str, tokens: Set[str]) -> bool:
+    return any(_contains_cue(norm, tokens, pattern) for pattern in BLOCK_INSTRUCTION_PATTERNS)
+
+
 def _infer_phase(text: str, drive_scores: Dict[str, int]) -> Tuple[str, str]:
     norm = _normalize(text)
     tokens = _tokenize(text)
-    if any(_contains_cue(norm, tokens, cue) for cue in BLOCK_CUES):
+    block_hits = [cue for cue in BLOCK_CUES if _contains_cue(norm, tokens, cue)]
+    if block_hits and not _block_cues_are_instructional(norm, tokens):
         return "block", "Shutdown or refusal cues detected."
 
     release_hits = sum(1 for cue in RELEASE_CUES if _contains_cue(norm, tokens, cue))
